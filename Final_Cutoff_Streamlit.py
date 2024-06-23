@@ -279,7 +279,6 @@ def page0():
                     Saturation_result = next((option for option in saturation_options if option in df1.columns), None)
                     Vcl_result = next((option for option in vcl_options if option in df1.columns), None)
                     Depth_result = next((option for option in depth_options if option in df1.columns), None)
-                    st.write(Porosity_result)
                     if (Porosity_result is None or Saturation_result is None or Vcl_result is None or Depth_result is None):
                         list_df1=[]
                         list_df1.append(df1.columns)
@@ -300,9 +299,9 @@ def page0():
 
 
                 if session_state.error_dfs:
-                    st.write("ONE OR MORE LAS FILES COULD NOT BE DETECTED, UPLOAD MANUALLY")
+                    st.warning("ONE OR MORE LAS FILES COULD NOT BE DETECTED, UPLOAD MANUALLY")
                 else:
-                    st.write("All LAS FILES SUCCESSFULLY DETECTED")
+                    st.success("All LAS FILES SUCCESSFULLY DETECTED")
 
     with tab2:        
         if session_state.error_dfs:
@@ -324,7 +323,17 @@ def page0():
                     # Store the DataFrame in session state
                     session_state.dfs[session_state.selected_well] = session_state.error_dfs[session_state.selected_well][1]
                     session_state.dfs = {key: session_state.dfs[key] for key in sorted(session_state.dfs)}
-                    
+        def convert_dfs_to_excel(dfs):
+            output= io.BytesIO()
+            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            # Iterate over the data and add traces to the subplots
+                for key, value in dfs.items():   
+                    value.to_excel(writer, sheet_name=key, index=False)
+            processed_data = output.getvalue()
+            return processed_data
+        if st.button('Save Raw Data to Excel'):
+            excel_data = convert_dfs_to_excel(session_state.dfs)
+            st.download_button(label = "Download Excel File",data = excel_data,file_name = "Raw_Data.xlsx",mime= 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')         
     
 def page01():       
     # Initialize Dev_data dictionary
@@ -429,36 +438,15 @@ def page1():
     with tab2:
         df_plotted = st.selectbox('Choos the well', list(session_state.dict_Rawdataframe.keys()))
         df_p = session_state.dict_Rawdataframe[df_plotted]
-        # Constant difference to check
-        # Constant difference to check
-        constant_diff = 0.1524
-
-        # Initial x-value for the vertical line
-        x_value = 1  # You can change this as needed
-
-        # Create a list to store the segments
-        segments = []
-
-        # Convert MD column to a numpy array
-        y_values = df_p['MD'].values
-
-        # Loop through y-values to check differences
-        for i in range(len(y_values) - 1):
-            if abs(y_values[i + 1] - y_values[i] - constant_diff) < 1e-10:  # Adding a tolerance for floating point comparisons
-                # Append the vertical line segment to the list if the difference is constant_diff
-                segments.append(go.Scatter(x=[x_value, x_value], y=[y_values[i], y_values[i + 1]], mode='lines', line=dict(color='blue', width=4)))
-
         # Create the figure with subplots
-        fig3 = make_subplots(rows=1, cols=4, shared_yaxes=True, column_widths=[0.25, 0.25, 0.25, 0.25])
+        fig3 = make_subplots(rows=1, cols=3, shared_yaxes=True)
 
         # Add scatter plots for each column
         fig3.add_trace(go.Scatter(x=df_p['Vcl'], y=df_p['MD'], mode='lines', name='Vclay'), row=1, col=1)
-        fig3.add_trace(go.Scatter(x=df_p['Pi'], y=df_p['MD'], mode='lines', name='Porosity', fill='tozeroy', fillcolor='green'), row=1, col=2)
-        fig3.add_trace(go.Scatter(x=df_p['Sw'], y=df_p['MD'], mode='lines', name='Saturation', fill='tozeroy'), row=1, col=3)
+        fig3.add_trace(go.Scatter(x=df_p['Pi'], y=df_p['MD'], mode='lines', name='Porosity',fill='tozerox',fillcolor='rgba(0, 255, 0, 0.1)'), row=1, col=2)
+        fig3.add_trace(go.Scatter(x=1-df_p['Sw'], y=df_p['MD'], mode='lines', name='Saturation', fill='tozerox',fillcolor='rgba(255, 0, 0, 0.1)'), row=1, col=3)
 
-        # Add the vertical line segments as the fourth subplot
-        for segment in segments:
-            fig3.add_trace(segment, row=1, col=4)
+       
 
         # Update layout
         fig3.update_layout(title_text="CUTOFF_PROPERTIES", height=800, width=1200, shapes=[
@@ -469,7 +457,7 @@ def page1():
         fig3.update_xaxes(nticks=4, range=[0, 1], showgrid=True, tickvals=[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1], row=1, col=1)  # For Vclay
         fig3.update_xaxes(nticks=4, range=[0, 0.4], showgrid=True, tickvals=[0, 0.1, 0.2, 0.3, 0.4], row=1, col=2)  # For Porosity
         fig3.update_xaxes(nticks=4, range=[1, 0], showgrid=True, tickvals=[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1], row=1, col=3)  # For Saturation
-        fig3.update_xaxes(range=[1, 1], showgrid=False, row=1, col=4)  # For Vertical Line Plot
+        
 
         # Update y-axis with range based on df_p['MD'] and reverse the y-axis
         fig3.update_yaxes(nticks=20, range=[df_p['MD'].max(), df_p['MD'].min()], showgrid=True)
