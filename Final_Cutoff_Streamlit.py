@@ -213,7 +213,7 @@ def cutoff_entry_form(Property,Defaultvalue,dictany):
 
     # Use the AgGrid component to display the grid
     grid_options = gb.build()
-    grid_response = AgGrid(df, gridOptions=grid_options, editable=True)
+    grid_response = AgGrid(df, gridOptions=grid_options, editable=True,enable_enterprise_modules=False)
 
     # Get the updated DataFrame after user edits
     updated_df = grid_response['data']
