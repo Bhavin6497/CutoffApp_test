@@ -1218,8 +1218,8 @@ def page6():
                 st.write(session_state.Average_Property_df)
 
 
-
-
+        st.write(session_state.updated_df.shape[0])
+        st.write(len(session_state.cases))
         if len(session_state.cases) == session_state.updated_df.shape[0]:
             case = st.selectbox("Chose the case",session_state.cases.keys())
             if case:
