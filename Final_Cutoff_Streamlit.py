@@ -1217,13 +1217,10 @@ def page6():
                 session_state.Average_Property_df.columns = ['Average_Porosity_Oil' ,'Average_Saturation_Oil','Average_Porosity_Gas','Average_Saturation_Gas']
                 st.write(session_state.Average_Property_df)
 
-
-        st.write(session_state.updated_df.shape[0])
-        st.write(len(session_state.cases))
-        if len(session_state.cases) == session_state.updated_df.shape[0]:
-            case = st.selectbox("Chose the case",session_state.cases.keys())
-            if case:
-                st.write(session_state.cases[case])  
+    if len(session_state.cases) == session_state.updated_df.shape[0]:
+        case = st.selectbox("Chose the case",session_state.cases.keys())
+        if case:
+            st.write(session_state.cases[case])  
     with tab2:
         if len(session_state.cases) == session_state.updated_df.shape[0]:
             first_df = next(iter(session_state.cases.values()))
