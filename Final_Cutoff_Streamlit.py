@@ -1067,12 +1067,215 @@ def page5():
 
         # Show plot
         st.plotly_chart(fig3)
+def page6():
+    st.success('SENSITIVITY ANALYSIS')
+    session_state=get_session_state()    
+    
+    tab1, tab2 = st.tabs(["SENSITIVITY_DATA", "SENSITIVITY_PLOT"])
+    with tab1:
+        df = pd.DataFrame('', index=range(20), columns=["VCLAY_CUTOFF" ,"POROSITY_CUTOFF" , "SATURATION_CUTOFF"])
+        # Create a GridOptionsBuilder object
+        gb = GridOptionsBuilder.from_dataframe(df)
+        gb.configure_default_column(editable=True)
+        gb.configure_grid_options(enableRangeSelection=True)
+        grid_options = gb.build()
+        grid_response = AgGrid(df, gridOptions=grid_options, editable=True)
+
+            # Get the updated DataFrame after user edits
+        session_state.updated_df = grid_response['data']
+            
+        if st.button("Submit"):
+            session_state.updated_df = session_state.updated_df.dropna(how='all').replace('', pd.NA).dropna(how='all')
+            st.write(session_state.updated_df)
+
+            def pay_calculator(df):
+                        if Dev_dataframe.empty:
+                            dummy_OWC= df
+                            dummy_OWC['DEVIATION_ANGLE']= 0
+                            dummy_OWC['TVD'] = session_state.interval_[i]       
+                        else:
+                            dummy_OWC = pd.merge_asof(df, Dev_dataframe[['MD','DEVIATION_ANGLE']], on='MD', direction='nearest')
+                            dummy_OWC['TVD'] = session_state.interval_[i]* np.cos(np.deg2rad(dummy_OWC['DEVIATION_ANGLE']))
+                        pay = dummy_OWC['TVD'].sum()
+                        return pay
+
+            session_state.cases = {}
+            session_state.Average_Property = {}
+            for row in session_state.updated_df.itertuples(index=True, name='Pandas'):
+                inde = int(row.Index)+1
+                Vclay_Cutoff = float(row.VCLAY_CUTOFF)
+                Porosity_Cutoff = float(row.POROSITY_CUTOFF)
+                Saturation_Cutoff = float(row.SATURATION_CUTOFF)
+                session_state.dict_Pay_P = {}
+                summary_Average_property = []
+                for i,((key,value),(Key1, value1)) in enumerate(zip(session_state.dict_Rawdataframe.items(),session_state.dict_wells.items())):
+                        Top = value1[0]
+                        GOC=  value1[1]
+                        OWC= value1[2]
+                        Bottom=value1[3]
+                        R_Type = value1[6]
+                        Dev_dataframe = value1[7]
+                        summary = []   
+                        if R_Type=='O':     
+                            well_postcutoff_OWC = session_state.dict_Rawdataframe[key][(session_state.dict_Rawdataframe[key]['MD'] >= Top) & (session_state.dict_Rawdataframe[key]['MD'] <= OWC)]
+                            well_postcutoff_OWC = well_postcutoff_OWC[(well_postcutoff_OWC['Vcl'] <= Vclay_Cutoff) & (well_postcutoff_OWC['Pi'] >= Porosity_Cutoff)] 
+                            Gross_pay_Oil_df=well_postcutoff_OWC.sort_values(by = 'MD')
+                            Gross_Pay_Oil = pay_calculator(Gross_pay_Oil_df)
+                            well_postcutoff_OWC = well_postcutoff_OWC[well_postcutoff_OWC['Sw']<=Saturation_Cutoff]
+                            well_postcutoff_OWC =well_postcutoff_OWC.sort_values(by='MD')
+                            Net_Pay_Oil = pay_calculator(well_postcutoff_OWC)
+                            Porosity_Oil = well_postcutoff_OWC['Pi'].mean()
+                            Saturation_Oil = well_postcutoff_OWC['Sw'].mean()
+                            summary_list = [Gross_Pay_Oil,Net_Pay_Oil,Porosity_Oil,Saturation_Oil,0,0,0,0]
+                            summary.extend(summary_list)
+                            session_state.dict_Pay_P[key]=summary
+
+                        elif R_Type=='G':
+                            well_postcutoff_GOC = session_state.dict_Rawdataframe[key][(session_state.dict_Rawdataframe[key]['MD'] >= Top) & (session_state.dict_Rawdataframe[key]['MD'] <= GOC)]
+                            well_postcutoff_GOC = well_postcutoff_GOC[(well_postcutoff_GOC['Vcl'] <= Vclay_Cutoff) & (well_postcutoff_GOC['Pi'] >= Porosity_Cutoff)]
+                            Gross_pay_gas_df=well_postcutoff_GOC.sort_values(by = 'MD')
+                            Gross_Pay_gas = pay_calculator(Gross_pay_gas_df)
+                            well_postcutoff_GOC = well_postcutoff_GOC[well_postcutoff_GOC['Sw']<=Saturation_Cutoff]
+                            well_postcutoff_GOC =well_postcutoff_GOC.sort_values(by='MD')
+                            Net_Pay_gas = pay_calculator(well_postcutoff_GOC)
+                            Porosity_gas = well_postcutoff_GOC['Pi'].mean()
+                            Saturation_gas = well_postcutoff_GOC['Sw'].mean()
+                            summary_list = [0,0,0,0,Gross_Pay_gas,Net_Pay_gas,Porosity_gas,Saturation_gas]
+                            summary.extend(summary_list)
+                            session_state.dict_Pay_P[key]=summary
+                        
+                            
+                        elif R_Type=='OG':
+                            if GOC==0:                
+                                well_postcutoff_OWC = session_state.dict_Rawdataframe[key][(session_state.dict_Rawdataframe[key]['MD'] >= Top) & (session_state.dict_Rawdataframe[key]['MD'] <= OWC)]
+                                well_postcutoff_OWC = well_postcutoff_OWC[(well_postcutoff_OWC['Vcl'] <= Vclay_Cutoff) & (well_postcutoff_OWC['Pi'] >= Porosity_Cutoff)]
+                                Gross_pay_Oil_df=well_postcutoff_OWC.sort_values(by = 'MD')
+                                Gross_Pay_Oil = pay_calculator(Gross_pay_Oil_df)
+                                well_postcutoff_OWC = well_postcutoff_OWC[well_postcutoff_OWC['Sw']<=Saturation_Cutoff]
+                                well_postcutoff_OWC =well_postcutoff_OWC.sort_values(by='MD')
+                                Net_Pay_Oil = pay_calculator(well_postcutoff_OWC)
+                                Porosity_Oil = well_postcutoff_OWC['Pi'].mean()
+                                Saturation_Oil = well_postcutoff_OWC['Sw'].mean()
+                                summary_list = [Gross_Pay_Oil,Net_Pay_Oil,Porosity_Oil,Saturation_Oil,0,0,0,0]
+                                summary.extend(summary_list)
+                                session_state.dict_Pay_P[key]=summary
+                        
+                                
+                            elif OWC==0:
+                                well_postcutoff_GOC = session_state.dict_Rawdataframe[key][(session_state.dict_Rawdataframe[key]['MD'] >= Top) & (session_state.dict_Rawdataframe[key]['MD'] <= GOC)]
+                                well_postcutoff_GOC = well_postcutoff_GOC[(well_postcutoff_GOC['Vcl'] <= Vclay_Cutoff) & (well_postcutoff_GOC['Pi'] >= Porosity_Cutoff)]
+                                Gross_pay_gas_df=well_postcutoff_GOC.sort_values(by = 'MD')
+                                Gross_Pay_gas = pay_calculator(Gross_pay_gas_df)
+                                well_postcutoff_GOC = well_postcutoff_GOC[well_postcutoff_GOC['Sw']<=Saturation_Cutoff]
+                                well_postcutoff_GOC =well_postcutoff_GOC.sort_values(by='MD')
+                                Net_Pay_gas = pay_calculator(well_postcutoff_GOC)
+                                Porosity_gas = well_postcutoff_GOC['Pi'].mean()
+                                Saturation_gas = well_postcutoff_GOC['Sw'].mean()
+                                summary_list = [0,0,0,0,Gross_Pay_gas,Net_Pay_gas,Porosity_gas,Saturation_gas]
+                                summary.extend(summary_list)
+                                session_state.dict_Pay_P[key]=summary
+                                            
+                            else:
+                                well_postcutoff_GOC = session_state.dict_Rawdataframe[key][(session_state.dict_Rawdataframe[key]['MD'] >= Top) & (session_state.dict_Rawdataframe[key]['MD'] <= GOC)]
+                                well_postcutoff_GOC = well_postcutoff_GOC[(well_postcutoff_GOC['Vcl'] <= Vclay_Cutoff) & (well_postcutoff_GOC['Pi'] >= Porosity_Cutoff)]
+                                Gross_pay_gas_df=well_postcutoff_GOC.sort_values(by = 'MD')
+                                Gross_Pay_gas = pay_calculator(Gross_pay_gas_df)
+                                well_postcutoff_GOC = well_postcutoff_GOC[well_postcutoff_GOC['Sw']<=Saturation_Cutoff]
+                                well_postcutoff_GOC =well_postcutoff_GOC.sort_values(by='MD')
+                                Net_Pay_gas = pay_calculator(well_postcutoff_GOC)
+                                Porosity_gas = well_postcutoff_GOC['Pi'].mean()
+                                Saturation_gas = well_postcutoff_GOC['Sw'].mean()
+                                well_postcutoff_OWC = session_state.dict_Rawdataframe[key][(session_state.dict_Rawdataframe[key]['MD'] > GOC) & (session_state.dict_Rawdataframe[key]['MD'] <= OWC)]
+                                well_postcutoff_OWC = well_postcutoff_OWC[(well_postcutoff_OWC['Vcl'] <= Vclay_Cutoff) & (well_postcutoff_OWC['Pi'] >= Porosity_Cutoff)]
+                                Gross_pay_Oil_df=well_postcutoff_OWC.sort_values(by = 'MD')
+                                Gross_Pay_Oil = pay_calculator(Gross_pay_Oil_df)
+                                well_postcutoff_OWC = well_postcutoff_OWC[well_postcutoff_OWC['Sw']<=Saturation_Cutoff]
+                                well_postcutoff_OWC =well_postcutoff_OWC.sort_values(by='MD')
+                                Net_Pay_Oil = pay_calculator(well_postcutoff_OWC)
+                                Porosity_Oil = well_postcutoff_OWC['Pi'].mean()
+                                Saturation_Oil = well_postcutoff_OWC['Sw'].mean()
+                                summary_list = [Gross_Pay_Oil ,Net_Pay_Oil,Porosity_Oil,Saturation_Oil,Gross_Pay_gas,Net_Pay_gas,Porosity_gas,Saturation_gas]
+                                summary.extend(summary_list)
+                                session_state.dict_Pay_P[key]=summary
+
+                        
+                session_state.df_final_case=pd.DataFrame.from_dict(session_state.dict_Pay_P,orient='index')
+                session_state.df_final_case.columns= ['Gross_Pay_Oil' ,'Net_Pay_Oil','Porosity_Oil','Saturation_Oil','Gross_Pay_Gas','Net_Pay_Gas','Porosity_Gas','Saturation_Gas']
+                Average_Porosity_Oil=((session_state.df_final_case['Net_Pay_Oil']*session_state.df_final_case['Porosity_Oil']).sum())/session_state.df_final_case['Net_Pay_Oil'].sum()
+                Average_Saturation_Oil=((session_state.df_final_case['Net_Pay_Oil']*session_state.df_final_case['Porosity_Oil']*session_state.df_final_case['Saturation_Oil']).sum())/(session_state.df_final_case['Net_Pay_Oil']*session_state.df_final_case['Porosity_Oil']).sum()
+                Average_Porosity_Gas=((session_state.df_final_case['Net_Pay_Gas']*session_state.df_final_case['Porosity_Gas']).sum())/session_state.df_final_case['Net_Pay_Gas'].sum()
+                Average_Saturation_Gas=((session_state.df_final_case['Net_Pay_Gas']*session_state.df_final_case['Porosity_Gas']*session_state.df_final_case['Saturation_Gas']).sum())/(session_state.df_final_case['Net_Pay_Gas']*session_state.df_final_case['Porosity_Gas']).sum()
+                summary_list_1 = [Average_Porosity_Oil ,Average_Saturation_Oil,Average_Porosity_Gas,Average_Saturation_Gas]
+                summary_Average_property.extend(summary_list_1)
+                session_state.cases[f"Vclay {Vclay_Cutoff}, Porosity {Porosity_Cutoff}, Saturation {Saturation_Cutoff}"] = session_state.df_final_case
+                session_state.Average_Property[f"Vclay {Vclay_Cutoff}, Porosity {Porosity_Cutoff}, Saturation {Saturation_Cutoff}"] = summary_Average_property
+                session_state.Average_Property_df = pd.DataFrame.from_dict(session_state.Average_Property,orient='index')
+                session_state.Average_Property_df.columns = ['Average_Porosity_Oil' ,'Average_Saturation_Oil','Average_Porosity_Gas','Average_Saturation_Gas']
+                st.write(session_state.Average_Property_df)
+
+
+
+
+        if len(session_state.cases) and session_state.cases == session_state.updated_df.shape[0]:
+            case = st.selectbox("Chose the case",session_state.cases.keys())
+            if case:
+                st.write(session_state.cases[case])  
+    with tab2:
+        if len(session_state.cases) and session_state.cases == session_state.updated_df.shape[0]:
+            first_df = next(iter(session_state.cases.values()))
+            # Extract the first column of this DataFrame
+            first_column = first_df.index
+            first_column_list = first_column.tolist()
+            keys_list = list(session_state.cases.keys())
+
+            # Initialize an empty list to store the concatenated DataFrames for each column
+            concatenated_columns = {}
+
+            # Assuming all DataFrames have the same number of columns
+            num_columns = 8
+
+            # Iterate over the column indices
+            for col_idx in range(num_columns):
+                # List to store the first column of each DataFrame
+                column_list = []
+                
+                # Iterate over the dictionary values (DataFrames)
+                for df in session_state.cases.values():
+                    # Append the specific column to the list
+                    column_list.append(df.iloc[:, col_idx])
+                
+                # Concatenate the columns into a new DataFrame
+                concatenated_column_df = pd.concat(column_list, axis=1, ignore_index=True)
+                concatenated_column_df.columns = keys_list
+                concatenated_column_df.index = first_column_list
+                concatenated_columns[session_state.df_final_case.columns[col_idx]]=(concatenated_column_df)
+
+            # Create a select box for user to choose which concatenated DataFrame to plot
+            selected_option = st.selectbox("Select a Property to plot:",list(concatenated_columns.keys()) )
+            # Plot the selected concatenated DataFrame with Plotly
+            selected_df = concatenated_columns[selected_option]
+            st.write(selected_df)
+            fig = go.Figure()
+
+            # Plot each column
+            for column in selected_df.columns:
+                fig.add_trace(go.Scatter(x=selected_df.index, y=selected_df[column], mode='lines', name=column))
+
+            fig.update_layout(
+                title=f'Line Plot of {selected_option} Concatenated',
+                xaxis_title='Wells',
+                yaxis_title='Values',
+                legend_title='Cases'
+            )
+
+            # Display the plot in Streamlit
+            st.plotly_chart(fig)
     
     
 # Main function
 def main():
     # Create sidebar with radio buttons
-    selected_page = st.sidebar.radio('CUTOFF ANALYSIS', ('RAW_DATA_UPLOADER','DEVIATION_DATA_UPLOADER', 'DISPLAYING_THE_RAW DATA', 'VCLAY_ANALYSIS', 'POROSITY_ANALYSIS','SW_ANALYSIS','PAY_AND_PARAMETERS_SUMMARY'))
+    selected_page = st.sidebar.radio('CUTOFF ANALYSIS', ('RAW_DATA_UPLOADER','DEVIATION_DATA_UPLOADER', 'DISPLAYING_THE_RAW DATA', 'VCLAY_ANALYSIS', 'POROSITY_ANALYSIS','SW_ANALYSIS','PAY_AND_PARAMETERS_SUMMARY','SENSITIVITY ANALYSIS'))
 
     # Conditionally display pages based on selected radio button
     if selected_page == 'RAW_DATA_UPLOADER':
@@ -1089,6 +1292,8 @@ def main():
         page4()
     elif selected_page == 'PAY_AND_PARAMETERS_SUMMARY':
         page5()
+    elif selected_page == 'SENSITIVITY ANALYSIS':
+        page6()
 
 if __name__ == '__main__':
     main()
