@@ -44,6 +44,8 @@ def get_session_state():
         st.session_state['Vclay_Cutoff_df']= None
     if 'Porosity_Cutoff_df' not in st.session_state:
         st.session_state['Porosity_Cutoff_df']= None
+    if 'Average_Property_df' not in st.session_state:
+        st.session_state.Average_Property_df= None
     if 'Top_Bot' not in st.session_state:
         st.session_state.Top_Bot= {}
     if 'error_dfs' not in st.session_state:
@@ -62,6 +64,8 @@ def get_session_state():
         st.session_state.interval_ = []
     if 'dict2' not in st.session_state:
         st.session_state.dict2 = {}
+    if 'Average_Property' not in st.session_state:
+        st.session_state.Average_Property = {}
     if 'dict3' not in st.session_state:
         st.session_state.dict3 = {}
     if 'dict4' not in st.session_state:
@@ -1216,12 +1220,12 @@ def page6():
 
 
 
-        if len(session_state.cases) and session_state.cases == session_state.updated_df.shape[0]:
+        if len(session_state.cases) == session_state.updated_df.shape[0]:
             case = st.selectbox("Chose the case",session_state.cases.keys())
             if case:
                 st.write(session_state.cases[case])  
     with tab2:
-        if len(session_state.cases) and session_state.cases == session_state.updated_df.shape[0]:
+        if len(session_state.cases) == session_state.updated_df.shape[0]:
             first_df = next(iter(session_state.cases.values()))
             # Extract the first column of this DataFrame
             first_column = first_df.index
