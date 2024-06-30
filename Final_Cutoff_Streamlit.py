@@ -28,7 +28,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.markdown("<h1 class='title'>CUTOFF - ANALYSER</h1>", unsafe_allow_html=True)
+st.markdown("<h1 class='title'>STATISTICAL ANALYSIS OF PETROPHYSICAL PARAMETERS</h1>", unsafe_allow_html=True)
 # Folder path where LAS files are located
 st.sidebar.title('Cutoff Categories')
 def get_session_state():
@@ -36,6 +36,8 @@ def get_session_state():
         st.session_state.files= None
     if 'session_state.df_final' not in st.session_state:
         st.session_state.df_final= None
+    if 'No_of_rows' not in st.session_state:
+        st.session_state.No_of_rows= None
     if 'NTG' not in st.session_state:
         st.session_state.NTG= None
     if 'PVH' not in st.session_state:
@@ -44,8 +46,6 @@ def get_session_state():
         st.session_state['Vclay_Cutoff_df']= None
     if 'Porosity_Cutoff_df' not in st.session_state:
         st.session_state['Porosity_Cutoff_df']= None
-    if 'Average_Property_df' not in st.session_state:
-        st.session_state.Average_Property_df= None
     if 'Top_Bot' not in st.session_state:
         st.session_state.Top_Bot= {}
     if 'error_dfs' not in st.session_state:
@@ -58,14 +58,20 @@ def get_session_state():
         st.session_state.Ex_File= None
     if 'dfs' not in st.session_state:
         st.session_state.dfs = {}
+    if 'updated_df' not in st.session_state:
+        st.session_state.updated_df = None
+    if 'cases' not in st.session_state:
+        st.session_state.cases = {}
+    if 'df_final_case' not in st.session_state:
+        st.session_state.df_final_case = None
     if 'dict1' not in st.session_state:
         st.session_state.dict1 = {}
-    if 'interval_' not in st.session_state:
+    if 'dict_Pay_P' not in st.session_state:
+        st.session_state.dict_Pay_P = {}
+    if 'interval_' not in st.session_state: 
         st.session_state.interval_ = []
     if 'dict2' not in st.session_state:
         st.session_state.dict2 = {}
-    if 'Average_Property' not in st.session_state:
-        st.session_state.Average_Property = {}
     if 'dict3' not in st.session_state:
         st.session_state.dict3 = {}
     if 'dict4' not in st.session_state:
@@ -377,7 +383,7 @@ def page01():
     grid_options = gb.build()
 
     # Display the Ag-Grid
-    grid_response = AgGrid(st.session_state.data, gridOptions=grid_options, update_mode=GridUpdateMode.VALUE_CHANGED)
+    grid_response = AgGrid(st.session_state.data, gridOptions=grid_options, update_mode=GridUpdateMode.VALUE_CHANGED,enable_enterprise_modules=False)
 
     # Update the session state data with the edited grid data
     st.session_state.data = grid_response['data']
@@ -405,7 +411,7 @@ def page01():
             value[index] = value[index].astype(float)
         else:
             value[index] = value[index].astype(float)
-    st.write(session_state.dict_wells)
+    
     
         
           
@@ -1083,14 +1089,18 @@ def page6():
         gb.configure_default_column(editable=True)
         gb.configure_grid_options(enableRangeSelection=True)
         grid_options = gb.build()
-        grid_response = AgGrid(df, gridOptions=grid_options, editable=True)
+        grid_response = AgGrid(df, gridOptions=grid_options, editable=True, enable_enterprise_modules=False)
 
             # Get the updated DataFrame after user edits
         session_state.updated_df = grid_response['data']
-            
+           
         if st.button("Submit"):
             session_state.updated_df = session_state.updated_df.dropna(how='all').replace('', pd.NA).dropna(how='all')
+            session_state.updated_df=session_state.updated_df.drop_duplicates()
+            session_state.No_of_rows=session_state.updated_df.shape[0]
             st.write(session_state.updated_df)
+            
+
 
             def pay_calculator(df):
                         if Dev_dataframe.empty:
@@ -1213,63 +1223,76 @@ def page6():
                 summary_Average_property.extend(summary_list_1)
                 session_state.cases[f"Vclay {Vclay_Cutoff}, Porosity {Porosity_Cutoff}, Saturation {Saturation_Cutoff}"] = session_state.df_final_case
                 session_state.Average_Property[f"Vclay {Vclay_Cutoff}, Porosity {Porosity_Cutoff}, Saturation {Saturation_Cutoff}"] = summary_Average_property
-                session_state.Average_Property_df = pd.DataFrame.from_dict(session_state.Average_Property,orient='index')
-                session_state.Average_Property_df.columns = ['Average_Porosity_Oil' ,'Average_Saturation_Oil','Average_Porosity_Gas','Average_Saturation_Gas']
-                st.write(session_state.Average_Property_df)
+                session_state.Average_Property_df = pd.DataFrame(session_state.Average_Property)
+                session_state.Average_Property_df.index = ['Average_Porosity_Oil' ,'Average_Saturation_Oil','Average_Porosity_Gas','Average_Saturation_Gas']
+                
 
-    if len(session_state.cases) == session_state.updated_df.shape[0]:
-        case = st.selectbox("Chose the case",session_state.cases.keys())
-        if case:
-            st.write(session_state.cases[case])  
+        if session_state.cases and len(session_state.cases)==session_state.No_of_rows:
+            case = st.selectbox("Chose the case",session_state.cases.keys())
+            if case:
+                st.write(session_state.cases[case])
+                st.write(session_state.Average_Property_df[case].T)  
     with tab2:
-        if len(session_state.cases) == session_state.updated_df.shape[0]:
+        if session_state.cases and len(session_state.cases)==session_state.No_of_rows:
             first_df = next(iter(session_state.cases.values()))
-            # Extract the first column of this DataFrame
+                # Extract the first column of this DataFrame
             first_column = first_df.index
             first_column_list = first_column.tolist()
             keys_list = list(session_state.cases.keys())
 
-            # Initialize an empty list to store the concatenated DataFrames for each column
+                # Initialize an empty list to store the concatenated DataFrames for each column
             concatenated_columns = {}
 
-            # Assuming all DataFrames have the same number of columns
+                # Assuming all DataFrames have the same number of columns
             num_columns = 8
 
-            # Iterate over the column indices
+                # Iterate over the column indices
             for col_idx in range(num_columns):
-                # List to store the first column of each DataFrame
+                    # List to store the first column of each DataFrame
                 column_list = []
-                
-                # Iterate over the dictionary values (DataFrames)
+                    
+                    # Iterate over the dictionary values (DataFrames)
                 for df in session_state.cases.values():
-                    # Append the specific column to the list
+                        # Append the specific column to the list
                     column_list.append(df.iloc[:, col_idx])
-                
-                # Concatenate the columns into a new DataFrame
+                    
+                    # Concatenate the columns into a new DataFrame
                 concatenated_column_df = pd.concat(column_list, axis=1, ignore_index=True)
                 concatenated_column_df.columns = keys_list
                 concatenated_column_df.index = first_column_list
                 concatenated_columns[session_state.df_final_case.columns[col_idx]]=(concatenated_column_df)
 
-            # Create a select box for user to choose which concatenated DataFrame to plot
+                # Create a select box for user to choose which concatenated DataFrame to plot
             selected_option = st.selectbox("Select a Property to plot:",list(concatenated_columns.keys()) )
-            # Plot the selected concatenated DataFrame with Plotly
+                # Plot the selected concatenated DataFrame with Plotly
             selected_df = concatenated_columns[selected_option]
             st.write(selected_df)
             fig = go.Figure()
 
-            # Plot each column
+                # Plot each column
             for column in selected_df.columns:
-                fig.add_trace(go.Scatter(x=selected_df.index, y=selected_df[column], mode='lines', name=column))
+                fig.add_trace(go.Scatter(x=selected_df.index, y=selected_df[column], mode='lines+markers', name=column))
 
             fig.update_layout(
-                title=f'Line Plot of {selected_option} Concatenated',
+                title=f'Line Plot of {selected_option}',
                 xaxis_title='Wells',
                 yaxis_title='Values',
                 legend_title='Cases'
             )
-
-            # Display the plot in Streamlit
+            st.plotly_chart(fig)
+            st.success("WEIGHTED AVERAGE PARAMETERS")
+            st.write(session_state.Average_Property_df) 
+            df_t = session_state.Average_Property_df.T
+            fig = go.Figure()
+            fig.add_trace(go.Bar(x=df_t.index,y=df_t['Average_Porosity_Oil'],name='Average_Porosity_Oil'))
+            fig.add_trace(go.Bar(x=df_t.index,y=df_t['Average_Porosity_Gas'],name='Average_Porosity_Gas'))
+            fig.update_layout(title='Bar Plot for Porosity of Different Cases',xaxis_title='Cases',yaxis_title='Values',barmode='group')
+            st.plotly_chart(fig) 
+        
+            fig = go.Figure()
+            fig.add_trace(go.Bar(x=df_t.index,y=df_t['Average_Saturation_Oil'],name='Average_Saturation_Oil'))
+            fig.add_trace(go.Bar(x=df_t.index,y=df_t['Average_Saturation_Gas'],name='Average_Saturation_Gas'))
+            fig.update_layout(title='Bar Plot for Water Saturation of Different Cases',xaxis_title='Cases',yaxis_title='Values',barmode='group')
             st.plotly_chart(fig)
     
     
