@@ -383,7 +383,7 @@ def page01():
     grid_options = gb.build()
 
     # Display the Ag-Grid
-    grid_response = AgGrid(st.session_state.data, gridOptions=grid_options, update_mode=GridUpdateMode.VALUE_CHANGED,enable_enterprise_modules=False)
+    grid_response = AgGrid(st.session_state.data, gridOptions=grid_options, update_mode=GridUpdateMode.VALUE_CHANGED)
 
     # Update the session state data with the edited grid data
     st.session_state.data = grid_response['data']
