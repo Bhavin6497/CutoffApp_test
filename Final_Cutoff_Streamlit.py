@@ -17,20 +17,18 @@ import tempfile
 st.set_page_config(layout="wide")
 
 # Center-align the title
-st.markdown(
-    """
+st.markdown("""
     <style>
     .title {
-        text-align: center;
+        font-size: 20px;  /* Change this to your desired font size */
+        text-align: center;  /* Center-align the title */
+        color: black;     /* Optional: Change the color if needed */
     }
     </style>
-    """,
-    unsafe_allow_html=True
-)
-
-st.markdown("<h1 class='title'>STATISTICAL ANALYSIS OF PETROPHYSICAL PARAMETERS</h1>", unsafe_allow_html=True)
+    <h1 class="title">STATISTICAL ANALYSIS OF PETROPHYSICAL PARAMETERS</h1>
+    """, unsafe_allow_html=True)
 # Folder path where LAS files are located
-st.sidebar.title('Cutoff Categories')
+st.sidebar.title('APP_CHRONOLOGY')
 def get_session_state():
     if 'files' not in st.session_state:
         st.session_state.files= None
@@ -545,7 +543,7 @@ def page2():
 
         fig1.update_xaxes(title_text="Cutoff", tickmode='array', tickvals=session_state.dict1[key][1]['cutoff'], showgrid=True)
         fig1.update_yaxes(title_text="PVH Percent")
-        fig1.update_layout(width=1100,height=700,plot_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)", width=2))])    
+        fig1.update_layout(width=1200,height=700,plot_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)", width=2))])    
         st.plotly_chart(fig1)
 
         # Plot NTG vs. Cutoff
@@ -556,7 +554,7 @@ def page2():
 
         fig2.update_xaxes(title_text="Cutoff", tickmode='array', tickvals=session_state.dict1[key][1]['cutoff'], showgrid=True)
         fig2.update_yaxes(title_text="NTG")
-        fig2.update_layout(width=1100,height=700,plot_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)",  width=2))])
+        fig2.update_layout(width=1200,height=700,plot_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)",  width=2))])
 
         st.plotly_chart(fig2)
 
@@ -635,7 +633,7 @@ def page3():
 
         fig1.update_xaxes(title_text="Cutoff", tickmode='array', tickvals=session_state.dict2[key][1]['cutoff'], showgrid=True)
         fig1.update_yaxes(title_text="PVH Percent")
-        fig1.update_layout(width=1100,height=700,plot_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)", width=2))])    
+        fig1.update_layout(width=1200,height=700,plot_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)", width=2))])    
         st.plotly_chart(fig1)
 
         # Plot NTG vs. Cutoff
@@ -646,7 +644,7 @@ def page3():
 
         fig2.update_xaxes(title_text="Cutoff", tickmode='array', tickvals=session_state.dict2[key][1]['cutoff'], showgrid=True)
         fig2.update_yaxes(title_text="NTG")
-        fig2.update_layout(width=1100,height=700,plot_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)",  width=2))])
+        fig2.update_layout(width=1200,height=700,plot_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)",  width=2))])
 
         st.plotly_chart(fig2)
 
@@ -726,7 +724,7 @@ def page4():
 
         fig1.update_xaxes(title_text="Cutoff", tickmode='array', tickvals=session_state.dict3[key][1]['cutoff'], showgrid=True)
         fig1.update_yaxes(title_text="PVH Percent")
-        fig1.update_layout(width=1100,height=700,plot_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)", width=2))])    
+        fig1.update_layout(width=1200,height=700,plot_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)", width=2))])    
         st.plotly_chart(fig1)
 
         # Plot NTG vs. Cutoff
@@ -737,7 +735,7 @@ def page4():
 
         fig2.update_xaxes(title_text="Cutoff", tickmode='array', tickvals=session_state.dict3[key][1]['cutoff'], showgrid=True)
         fig2.update_yaxes(title_text="NTG")
-        fig2.update_layout(width=1100,height=700,plot_bgcolor='white',paper_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)",  width=2))])
+        fig2.update_layout(width=1200,height=700,plot_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)",  width=2))])
 
         st.plotly_chart(fig2)
 
@@ -1037,46 +1035,46 @@ def page5():
         segment_vclay=segements_creator(session_state.dict2,1,'blue',session_state.interval_)
         segment_porosity=segements_creator(session_state.dict3,2,'green',session_state.interval_)
         segment_saturation=segements_creator(session_state.dict5,3,'red',session_state.interval_)
-        
-        df_plotted = st.selectbox('Choos the well for plot', list(session_state.dict_Rawdataframe.keys()))
-        df_p = session_state.dict_Rawdataframe[df_plotted]
-        # Create the figure with subplots
-        fig3 = make_subplots(rows=1, cols=4, shared_yaxes=True, column_widths=[0.25, 0.25, 0.25, 0.25])
-
-        # Add scatter plots for each column
-        fig3.add_trace(go.Scatter(x=df_p['Vcl'], y=df_p['MD'], mode='lines', name='Vclay'), row=1, col=1)
-        fig3.add_trace(go.Scatter(x=df_p['Pi'], y=df_p['MD'], mode='lines', name='Porosity',fill='tozerox',fillcolor='rgba(0, 255, 0, 0.1)'), row=1, col=2)
-        fig3.add_trace(go.Scatter(x=1-df_p['Sw'], y=df_p['MD'], mode='lines', name='Saturation', fill='tozerox',fillcolor='rgba(255, 0, 0, 0.1)'), row=1, col=3)
-
-        # Add the vertical line segments as the fourth subplot
-        for segment in segment_vclay[df_plotted]:
-            fig3.add_trace(segment,  row=1, col=4)
-        for segment in segment_porosity[df_plotted]:
-            fig3.add_trace(segment,  row=1, col=4)
-        for segment in segment_saturation[df_plotted]:
-            fig3.add_trace(segment,  row=1, col=4)
-        
-        y_value_OWC = session_state.dict_wells[df_plotted][2]
-        y_value_GOC = session_state.dict_wells[df_plotted][1]   
-        fig3.add_hline(y=y_value_OWC,line=dict(color="red", width=2),row="all", col="all")
-        fig3.add_hline(y=y_value_GOC,line=dict(color="green", width=2),row="all", col="all")
-
-        # Update layout
-        fig3.update_layout(title_text="CUTOFF_PROPERTIES", height=800, width=1200, shapes=[
-            dict(type="rect", xref="paper", yref="paper", x0=0, y0=0, x1=1, y1=1, line=dict(color="rgba(0, 0, 0, 0.6)", width=2))
-        ])
-
-        # Update x-axes for each subplot
-        fig3.update_xaxes(nticks=4, range=[0, 1], showgrid=True, tickvals=[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1], row=1, col=1)  # For Vclay
-        fig3.update_xaxes(nticks=4, range=[0, 0.4], showgrid=True, tickvals=[0, 0.1, 0.2, 0.3, 0.4], row=1, col=2)  # For Porosity
-        fig3.update_xaxes(nticks=4, range=[0,1], showgrid=True, tickvals=[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1], row=1, col=3)  # For Saturation
-        fig3.update_xaxes(range=[0, 4], showgrid=False, row=1, col=4)  # For Vertical Line Plot
-
-        # Update y-axis with range based on df_p['MD'] and reverse the y-axis
-        fig3.update_yaxes(nticks=20, range=[df_p['MD'].max(), df_p['MD'].min()], showgrid=True)
-
-        # Show plot
-        st.plotly_chart(fig3)
+        if segment_saturation and len(segment_saturation)==len(dict_Rawdataframe):
+            df_plotted = st.selectbox('Choos the well for plot', list(session_state.dict_Rawdataframe.keys()))
+            df_p = session_state.dict_Rawdataframe[df_plotted]
+            # Create the figure with subplots
+            fig3 = make_subplots(rows=1, cols=4, shared_yaxes=True, column_widths=[0.25, 0.25, 0.25, 0.25])
+    
+            # Add scatter plots for each column
+            fig3.add_trace(go.Scatter(x=df_p['Vcl'], y=df_p['MD'], mode='lines', name='Vclay'), row=1, col=1)
+            fig3.add_trace(go.Scatter(x=df_p['Pi'], y=df_p['MD'], mode='lines', name='Porosity',fill='tozerox',fillcolor='rgba(0, 255, 0, 0.1)'), row=1, col=2)
+            fig3.add_trace(go.Scatter(x=1-df_p['Sw'], y=df_p['MD'], mode='lines', name='Saturation', fill='tozerox',fillcolor='rgba(255, 0, 0, 0.1)'), row=1, col=3)
+    
+            # Add the vertical line segments as the fourth subplot
+            for segment in segment_vclay[df_plotted]:
+                fig3.add_trace(segment,  row=1, col=4)
+            for segment in segment_porosity[df_plotted]:
+                fig3.add_trace(segment,  row=1, col=4)
+            for segment in segment_saturation[df_plotted]:
+                fig3.add_trace(segment,  row=1, col=4)
+            
+            y_value_OWC = session_state.dict_wells[df_plotted][2]
+            y_value_GOC = session_state.dict_wells[df_plotted][1]   
+            fig3.add_hline(y=y_value_OWC,line=dict(color="red", width=2),row="all", col="all")
+            fig3.add_hline(y=y_value_GOC,line=dict(color="green", width=2),row="all", col="all")
+    
+            # Update layout
+            fig3.update_layout(title_text="CUTOFF_PROPERTIES", height=800, width=1200, shapes=[
+                dict(type="rect", xref="paper", yref="paper", x0=0, y0=0, x1=1, y1=1, line=dict(color="rgba(0, 0, 0, 0.6)", width=2))
+            ])
+    
+            # Update x-axes for each subplot
+            fig3.update_xaxes(nticks=4, range=[0, 1], showgrid=True, tickvals=[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1], row=1, col=1)  # For Vclay
+            fig3.update_xaxes(nticks=4, range=[0, 0.4], showgrid=True, tickvals=[0, 0.1, 0.2, 0.3, 0.4], row=1, col=2)  # For Porosity
+            fig3.update_xaxes(nticks=4, range=[0,1], showgrid=True, tickvals=[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1], row=1, col=3)  # For Saturation
+            fig3.update_xaxes(range=[0, 4], showgrid=False, row=1, col=4)  # For Vertical Line Plot
+    
+            # Update y-axis with range based on df_p['MD'] and reverse the y-axis
+            fig3.update_yaxes(nticks=20, range=[df_p['MD'].max(), df_p['MD'].min()], showgrid=True)
+    
+            # Show plot
+            st.plotly_chart(fig3)
 def page6():
     st.success('SENSITIVITY ANALYSIS')
     session_state=get_session_state()    
