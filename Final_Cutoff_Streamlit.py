@@ -545,7 +545,7 @@ def page2():
 
         fig1.update_xaxes(title_text="Cutoff", tickmode='array', tickvals=session_state.dict1[key][1]['cutoff'], showgrid=True)
         fig1.update_yaxes(title_text="PVH Percent")
-        fig1.update_layout(width=1000,height=700,plot_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)", width=2))])    
+        fig1.update_layout(width=1100,height=700,plot_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)", width=2))])    
         st.plotly_chart(fig1)
 
         # Plot NTG vs. Cutoff
@@ -556,7 +556,7 @@ def page2():
 
         fig2.update_xaxes(title_text="Cutoff", tickmode='array', tickvals=session_state.dict1[key][1]['cutoff'], showgrid=True)
         fig2.update_yaxes(title_text="NTG")
-        fig2.update_layout(width=1000,height=700,plot_bgcolor='white',paper_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)",  width=2))])
+        fig2.update_layout(width=1100,height=700,plot_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)",  width=2))])
 
         st.plotly_chart(fig2)
 
@@ -635,7 +635,7 @@ def page3():
 
         fig1.update_xaxes(title_text="Cutoff", tickmode='array', tickvals=session_state.dict2[key][1]['cutoff'], showgrid=True)
         fig1.update_yaxes(title_text="PVH Percent")
-        fig1.update_layout(width=1000,height=700,plot_bgcolor='white',paper_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)", width=2))])    
+        fig1.update_layout(width=1100,height=700,plot_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)", width=2))])    
         st.plotly_chart(fig1)
 
         # Plot NTG vs. Cutoff
@@ -646,7 +646,7 @@ def page3():
 
         fig2.update_xaxes(title_text="Cutoff", tickmode='array', tickvals=session_state.dict2[key][1]['cutoff'], showgrid=True)
         fig2.update_yaxes(title_text="NTG")
-        fig2.update_layout(width=1000,height=700,plot_bgcolor='white',paper_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)",  width=2))])
+        fig2.update_layout(width=1100,height=700,plot_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)",  width=2))])
 
         st.plotly_chart(fig2)
 
@@ -726,7 +726,7 @@ def page4():
 
         fig1.update_xaxes(title_text="Cutoff", tickmode='array', tickvals=session_state.dict3[key][1]['cutoff'], showgrid=True)
         fig1.update_yaxes(title_text="PVH Percent")
-        fig1.update_layout(width=1000,height=700,plot_bgcolor='white',paper_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)", width=2))])    
+        fig1.update_layout(width=1100,height=700,plot_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)", width=2))])    
         st.plotly_chart(fig1)
 
         # Plot NTG vs. Cutoff
@@ -737,7 +737,7 @@ def page4():
 
         fig2.update_xaxes(title_text="Cutoff", tickmode='array', tickvals=session_state.dict3[key][1]['cutoff'], showgrid=True)
         fig2.update_yaxes(title_text="NTG")
-        fig2.update_layout(width=1000,height=700,plot_bgcolor='white',paper_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)",  width=2))])
+        fig2.update_layout(width=1100,height=700,plot_bgcolor='white',paper_bgcolor='white',shapes=[dict(type="rect",xref="paper",yref="paper",x0=0,y0=0,x1=1,y1=1,line=dict(color="rgba(0, 0, 0, 0.6)",  width=2))])
 
         st.plotly_chart(fig2)
 
