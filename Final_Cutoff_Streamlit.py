@@ -1087,7 +1087,7 @@ def page6():
         gb.configure_default_column(editable=True)
         gb.configure_grid_options(enableRangeSelection=True)
         grid_options = gb.build()
-        grid_response = AgGrid(df, gridOptions=grid_options, editable=True, enable_enterprise_modules=False)
+        grid_response = AgGrid(df, gridOptions=grid_options, editable=True)
 
             # Get the updated DataFrame after user edits
         session_state.updated_df = grid_response['data']
