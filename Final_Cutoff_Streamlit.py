@@ -20,9 +20,9 @@ st.set_page_config(layout="wide")
 st.markdown("""
     <style>
     .title {
-        font-size: 20px;  /* Change this to your desired font size */
+        font-size: 40px;  /* Change this to your desired font size */
         text-align: center;  /* Center-align the title */
-        color: black;     /* Optional: Change the color if needed */
+        color: white;     /* Optional: Change the color if needed */
     }
     </style>
     <h1 class="title">STATISTICAL ANALYSIS OF PETROPHYSICAL PARAMETERS</h1>
@@ -1035,7 +1035,7 @@ def page5():
         segment_vclay=segements_creator(session_state.dict2,1,'blue',session_state.interval_)
         segment_porosity=segements_creator(session_state.dict3,2,'green',session_state.interval_)
         segment_saturation=segements_creator(session_state.dict5,3,'red',session_state.interval_)
-        if segment_saturation and len(segment_saturation)==len(dict_Rawdataframe):
+        if segment_saturation and len(segment_saturation)==len(session_state.dict_Rawdataframe):
             df_plotted = st.selectbox('Choos the well for plot', list(session_state.dict_Rawdataframe.keys()))
             df_p = session_state.dict_Rawdataframe[df_plotted]
             # Create the figure with subplots
