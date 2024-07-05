@@ -1077,8 +1077,6 @@ def page5():
             # Show plot
             st.plotly_chart(fig3)
 
-        # Show plot
-        st.plotly_chart(fig3)
 def page6():
     st.success('SENSITIVITY ANALYSIS')
     session_state=get_session_state()    
