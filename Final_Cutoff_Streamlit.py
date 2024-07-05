@@ -1035,49 +1035,67 @@ def page5():
         segment_vclay=segements_creator(session_state.dict2,1,'blue',session_state.interval_)
         segment_porosity=segements_creator(session_state.dict3,2,'green',session_state.interval_)
         segment_saturation=segements_creator(session_state.dict5,3,'red',session_state.interval_)
-        if segment_saturation and len(segment_saturation)==len(session_state.dict_Rawdataframe):
-            df_plotted = st.selectbox('Choos the well for plot', list(session_state.dict_Rawdataframe.keys()))
-            y_value_OWC = session_state.dict_wells[df_plotted][2]
-            y_value_GOC = session_state.dict_wells[df_plotted][1]
-            df_p = session_state.dict_Rawdataframe[df_plotted]
-            # Create the figure with subplots
-            fig3 = make_subplots(rows=1, cols=4, shared_yaxes=True, column_widths=[0.25, 0.25, 0.25, 0.25])
-    
-            # Add scatter plots for each column
-            fig3.add_trace(go.Scatter(x=df_p['Vcl'], y=df_p['MD'], mode='lines', name='Vclay'), row=1, col=1)
-            fig3.add_trace(go.Scatter(x=df_p['Pi'], y=df_p['MD'], mode='lines', name='Porosity',fill='tozerox',fillcolor='rgba(0, 255, 0, 0.1)'), row=1, col=2)
-            fig3.add_trace(go.Scatter(x=1-df_p['Sw'], y=df_p['MD'], mode='lines', name='Saturation', fill='tozerox',fillcolor='rgba(255, 0, 0, 0.1)'), row=1, col=3)
-    
-            # Add the vertical line segments as the fourth subplot
-            for segment in segment_vclay[df_plotted]:
-                fig3.add_trace(segment,  row=1, col=4)
-            for segment in segment_porosity[df_plotted]:
-                fig3.add_trace(segment,  row=1, col=4)
-            for segment in segment_saturation[df_plotted]:
-                fig3.add_trace(segment,  row=1, col=4)
-            
-            y_value_OWC = session_state.dict_wells[df_plotted][2]
-            y_value_GOC = session_state.dict_wells[df_plotted][1]
-            fig3.add_hline(y=y_value_OWC,line=dict(color="red", width=2),row="all", col="all")
-            fig3.add_hline(y=y_value_GOC,line=dict(color="green", width=2),row="all", col="all")
-            fig3.add_shape(type="line",x0=0, x1=1, y0=y_value_OWC, y1=y_value_OWC,xref='paper', yref='y',line=dict(color="Red", width=2, dash="dashdot"))
-    
-            # Update layout
-            fig3.update_layout(title_text="CUTOFF_PROPERTIES", height=800, width=1200, shapes=[
-                dict(type="rect", xref="paper", yref="paper", x0=0, y0=0, x1=1, y1=1, line=dict(color="rgba(0, 0, 0, 0.6)", width=2))
-            ])
-    
-            # Update x-axes for each subplot
-            fig3.update_xaxes(nticks=4, range=[0, 1], showgrid=True, tickvals=[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1], row=1, col=1)  # For Vclay
-            fig3.update_xaxes(nticks=4, range=[0, 0.4], showgrid=True, tickvals=[0, 0.1, 0.2, 0.3, 0.4], row=1, col=2)  # For Porosity
-            fig3.update_xaxes(nticks=4, range=[0,1], showgrid=True, tickvals=[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1], row=1, col=3)  # For Saturation
-            fig3.update_xaxes(range=[0, 4], showgrid=False, row=1, col=4)  # For Vertical Line Plot
-    
-            # Update y-axis with range based on df_p['MD'] and reverse the y-axis
-            fig3.update_yaxes(nticks=20, range=[df_p['MD'].max(), df_p['MD'].min()], showgrid=True)
-    
-            # Show plot
-            st.plotly_chart(fig3)
+    if segment_saturation and len(segment_saturation) == len(session_state.dict_Rawdataframe):
+        df_plotted = st.selectbox('Choose the well for plot', list(session_state.dict_Rawdataframe.keys()))
+        y_value_OWC = session_state.dict_wells[df_plotted][2]
+        y_value_GOC = session_state.dict_wells[df_plotted][1]
+        df_p = session_state.dict_Rawdataframe[df_plotted]
+
+        # Create individual plots using Plotly Express
+        fig_vclay = px.line(df_p, x='Vcl', y='MD', title='Vclay')
+        fig_porosity = px.line(df_p, x='Pi', y='MD', title='Porosity')
+        fig_saturation = px.line(df_p, x=1 - df_p['Sw'], y='MD', title='Saturation')
+
+        # Create the figure with subplots
+        fig3 = make_subplots(rows=1, cols=4, shared_yaxes=True, column_widths=[0.25, 0.25, 0.25, 0.25])
+
+        # Add scatter plots for each column
+        fig3.add_trace(fig_vclay['data'][0], row=1, col=1)
+        fig3.add_trace(fig_porosity['data'][0], row=1, col=2)
+        fig3.add_trace(fig_saturation['data'][0], row=1, col=3)
+
+        # Add the vertical line segments as the fourth subplot
+        for segment in segment_vclay[df_plotted]:
+            fig3.add_trace(segment, row=1, col=4)
+        for segment in segment_porosity[df_plotted]:
+            fig3.add_trace(segment, row=1, col=4)
+        for segment in segment_saturation[df_plotted]:
+            fig3.add_trace(segment, row=1, col=4)
+
+        # Add horizontal lines for OWC and GOC
+        fig3.add_hline(y=y_value_OWC, line=dict(color="red", width=2, dash="dashdot"), row="all", col="all")
+        fig3.add_hline(y=y_value_GOC, line=dict(color="green", width=2, dash="dashdot"), row="all", col="all")
+
+        # Update layout
+        fig3.update_layout(
+            title_text="CUTOFF_PROPERTIES",
+            height=800,
+            width=1200,
+            shapes=[
+                dict(
+                    type="rect",
+                    xref="paper",
+                    yref="paper",
+                    x0=0,
+                    y0=0,
+                    x1=1,
+                    y1=1,
+                    line=dict(color="rgba(0, 0, 0, 0.6)", width=2)
+                )
+            ]
+        )
+
+        # Update x-axes for each subplot
+        fig3.update_xaxes(nticks=4, range=[0, 1], showgrid=True, tickvals=[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1], row=1, col=1)
+        fig3.update_xaxes(nticks=4, range=[0, 0.4], showgrid=True, tickvals=[0, 0.1, 0.2, 0.3, 0.4], row=1, col=2)
+        fig3.update_xaxes(nticks=4, range=[0, 1], showgrid=True, tickvals=[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1], row=1, col=3)
+        fig3.update_xaxes(range=[0, 4], showgrid=False, row=1, col=4)
+
+        # Update y-axis with range based on df_p['MD'] and reverse the y-axis
+        fig3.update_yaxes(nticks=20, range=[df_p['MD'].max(), df_p['MD'].min()], showgrid=True)
+
+        # Show plot
+        st.plotly_chart(fig3)
 def page6():
     st.success('SENSITIVITY ANALYSIS')
     session_state=get_session_state()    
