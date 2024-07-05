@@ -1039,8 +1039,8 @@ def page5():
             df_plotted = st.selectbox('Choos the well for plot', list(session_state.dict_Rawdataframe.keys()))
             y_value_OWC = session_state.dict_wells[df_plotted][2]
             y_value_GOC = session_state.dict_wells[df_plotted][1]
-            st.write(f"OWC: {y_value_OWC}")
-            st.write(f"GOC: {y_value_GOC}")
+            st.write(f"OWC/OB: {y_value_OWC}")
+            st.write(f"GOC/GB: {y_value_GOC}")
             df_p = session_state.dict_Rawdataframe[df_plotted]
             # Create the figure with subplots
             fig3 = make_subplots(rows=1, cols=4, shared_yaxes=True, column_widths=[0.25, 0.25, 0.25, 0.25])
@@ -1075,8 +1075,8 @@ def page5():
     
             # Update y-axis with range based on df_p['MD'] and reverse the y-axis
             fig3.update_yaxes(nticks=20, range=[df_p['MD'].max(), df_p['MD'].min()], showgrid=True)
-            fig3.add_hline(y=y_value_OWC, line=dict(color="red", width=2, dash="dashdot"),annotation_text="OWC", annotation_position="bottom right",annotation_font_size=20,annotation_font_color="blue")
-            fig3.add_hline(y=y_value_GOC, line=dict(color="green", width=2, dash="dashdot"),annotation_text="OWC", annotation_position="bottom right",annotation_font_size=20,annotation_font_color="blue")
+            fig3.add_hline(y=y_value_OWC, line=dict(color="red", width=2, dash="dashdot"),annotation_text="OWC/OB", annotation_position="bottom right",annotation_font_size=20,annotation_font_color="blue")
+            fig3.add_hline(y=y_value_GOC, line=dict(color="green", width=2, dash="dashdot"),annotation_text="GOC/GB", annotation_position="bottom right",annotation_font_size=20,annotation_font_color="blue")
             # Show plot
             st.plotly_chart(fig3)
 
