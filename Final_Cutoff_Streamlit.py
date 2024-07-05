@@ -1055,10 +1055,10 @@ def page5():
                 fig3.add_trace(segment,  row=1, col=4)
             
             y_value_OWC = session_state.dict_wells[df_plotted][2]
-            y_value_GOC = session_state.dict_wells[df_plotted][1]   
+            y_value_GOC = session_state.dict_wells[df_plotted][1]
             fig3.add_hline(y=y_value_OWC,line=dict(color="red", width=2),row="all", col="all")
             fig3.add_hline(y=y_value_GOC,line=dict(color="green", width=2),row="all", col="all")
-            fig.add_shape(type="line",x0=0, x1=1, y0=y_value_GOC, y1=y_value_GOC,xref='paper', yref='y',line=dict(color="Red", width=2, dash="dashdot"))
+            fig.add_shape(type="line",x0=0, x1=1, y0=y_value_OWC, y1=y_value_OWC,xref='paper', yref='y',line=dict(color="Red", width=2, dash="dashdot"))
     
             # Update layout
             fig3.update_layout(title_text="CUTOFF_PROPERTIES", height=800, width=1200, shapes=[
