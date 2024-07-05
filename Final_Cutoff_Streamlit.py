@@ -1043,7 +1043,7 @@ def page5():
             df_p = session_state.dict_Rawdataframe[df_plotted]
             # Create the figure with subplots
             fig3 = make_subplots(rows=1, cols=4, shared_yaxes=True, column_widths=[0.25, 0.25, 0.25, 0.25])
-    
+            fig3.add_shape(type="line",x0=0, x1=1, y0=y_value_OWC, y1=y_value_OWC,xref='paper', yref='y',line=dict(color="Red", width=2, dash="dashdot"))
             # Add scatter plots for each column
             fig3.add_trace(go.Scatter(x=df_p['Vcl'], y=df_p['MD'], mode='lines', name='Vclay'), row=1, col=1)
             fig3.add_trace(go.Scatter(x=df_p['Pi'], y=df_p['MD'], mode='lines', name='Porosity',fill='tozerox',fillcolor='rgba(0, 255, 0, 0.1)'), row=1, col=2)
@@ -1059,7 +1059,7 @@ def page5():
             
         
             
-            fig3.add_shape(type="line",x0=0, x1=1, y0=y_value_OWC, y1=y_value_OWC,xref='paper', yref='y',line=dict(color="Red", width=2, dash="dashdot"))
+            
     
             # Update layout
             fig3.update_layout(title_text="CUTOFF_PROPERTIES", height=800, width=1200, shapes=[
