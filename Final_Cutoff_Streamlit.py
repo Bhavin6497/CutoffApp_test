@@ -1043,8 +1043,7 @@ def page5():
             df_p = session_state.dict_Rawdataframe[df_plotted]
             # Create the figure with subplots
             fig3 = make_subplots(rows=1, cols=4, shared_yaxes=True, column_widths=[0.25, 0.25, 0.25, 0.25])
-            fig3.add_hline(y=y_value_OWC, line=dict(color="red", width=2, dash="dashdot"), row="all", col="all")
-            fig3.add_hline(y=y_value_GOC, line=dict(color="green", width=2, dash="dashdot"), row="all", col="all")
+           
             # Add scatter plots for each column
             fig3.add_trace(go.Scatter(x=df_p['Vcl'], y=df_p['MD'], mode='lines', name='Vclay'), row=1, col=1)
             fig3.add_trace(go.Scatter(x=df_p['Pi'], y=df_p['MD'], mode='lines', name='Porosity',fill='tozerox',fillcolor='rgba(0, 255, 0, 0.1)'), row=1, col=2)
@@ -1075,7 +1074,8 @@ def page5():
     
             # Update y-axis with range based on df_p['MD'] and reverse the y-axis
             fig3.update_yaxes(nticks=20, range=[df_p['MD'].max(), df_p['MD'].min()], showgrid=True)
-    
+            fig3.add_hline(y=y_value_OWC, line=dict(color="red", width=2, dash="dashdot"), row="all", col="all")
+            fig3.add_hline(y=y_value_GOC, line=dict(color="green", width=2, dash="dashdot"), row="all", col="all")
             # Show plot
             st.plotly_chart(fig3)
 
