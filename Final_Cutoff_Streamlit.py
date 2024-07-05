@@ -1075,8 +1075,8 @@ def page5():
     
             # Update y-axis with range based on df_p['MD'] and reverse the y-axis
             fig3.update_yaxes(nticks=20, range=[df_p['MD'].max(), df_p['MD'].min()], showgrid=True)
-            fig3.add_hline(y=y_value_OWC, line=dict(color="red", width=2, dash="dashdot",text="OWC",textposition="end",font=dict(size=20, color="blue"),yanchor="top"), row="all", col="all")
-            fig3.add_hline(y=y_value_GOC, line=dict(color="green", width=2, dash="dashdot",text="GOC",textposition="end",font=dict(size=20, color="blue"),yanchor="top"), row="all", col="all")
+            fig3.add_hline(y=y_value_OWC, line=dict(color="red", width=2, dash="dashdot"),label = dict(text="OWC",textposition="end",font=dict(size=20, color="blue"),yanchor="top"), row="all", col="all")
+            fig3.add_hline(y=y_value_GOC, line=dict(color="green", width=2, dash="dashdot"),label = dict(text="GOC",textposition="end",font=dict(size=20, color="blue"),yanchor="top"), row="all", col="all")
             # Show plot
             st.plotly_chart(fig3)
 
