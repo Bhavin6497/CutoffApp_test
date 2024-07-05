@@ -1035,7 +1035,7 @@ def page5():
         segment_vclay=segements_creator(session_state.dict2,1,'blue',session_state.interval_)
         segment_porosity=segements_creator(session_state.dict3,2,'green',session_state.interval_)
         segment_saturation=segements_creator(session_state.dict5,3,'red',session_state.interval_)
-   if segment_saturation and len(segment_saturation)==len(session_state.dict_Rawdataframe):
+        if segment_saturation and len(segment_saturation)==len(session_state.dict_Rawdataframe):
             df_plotted = st.selectbox('Choos the well for plot', list(session_state.dict_Rawdataframe.keys()))
             y_value_OWC = session_state.dict_wells[df_plotted][2]
             y_value_GOC = session_state.dict_wells[df_plotted][1]
