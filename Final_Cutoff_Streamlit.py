@@ -1039,6 +1039,7 @@ def page5():
             df_plotted = st.selectbox('Choos the well for plot', list(session_state.dict_Rawdataframe.keys()))
             y_value_OWC = session_state.dict_wells[df_plotted][2]
             y_value_GOC = session_state.dict_wells[df_plotted][1]
+            st.write(y_value_OWC)
             df_p = session_state.dict_Rawdataframe[df_plotted]
             # Create the figure with subplots
             fig3 = make_subplots(rows=1, cols=4, shared_yaxes=True, column_widths=[0.25, 0.25, 0.25, 0.25])
