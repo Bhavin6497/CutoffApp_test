@@ -778,17 +778,18 @@ def page5():
                 well_postcutoff_OWC = well_postcutoff_OWC[well_postcutoff_OWC['Sw']<=S_W_Cut]
                 well_postcutoff_OWC =well_postcutoff_OWC.sort_values(by='MD')
                 post_cutoff_df = well_postcutoff_OWC
-                OWC = well_postcutoff_OWC['MD'].iloc[-1]
-                Net_Pay_Oil = pay_calculator(well_postcutoff_OWC)
-                Porosity_Oil = well_postcutoff_OWC['Pi'].mean()
-                Saturation_Oil = well_postcutoff_OWC['Sw'].mean()
-                well_postcutoff_bottom = session_state.dict3[key][0][(session_state.dict3[key][0]['MD'] > OWC) & (session_state.dict3[key][0]['MD'] <= Bottom)]
-                well_postcutoff_bottom =well_postcutoff_bottom.sort_values(by='MD')
-                blank_row = pd.DataFrame({}, index=[0])
-                well_postcutoff = pd.concat([well_postcutoff_OWC,blank_row, well_postcutoff_bottom]).reset_index(drop=True)
-                summary_list = [Gross_Pay_Oil,Net_Pay_Oil,Porosity_Oil,Saturation_Oil,0,0,0,0]
-                summary.extend(summary_list)
-                session_state.dict_Pay_Parameter[key]=summary
+                if not well_postcutoff_OWC.empty:
+                    OWC = well_postcutoff_OWC['MD'].iloc[-1]
+                    Net_Pay_Oil = pay_calculator(well_postcutoff_OWC)
+                    Porosity_Oil = well_postcutoff_OWC['Pi'].mean()
+                    Saturation_Oil = well_postcutoff_OWC['Sw'].mean()
+                    well_postcutoff_bottom = session_state.dict3[key][0][(session_state.dict3[key][0]['MD'] > OWC) & (session_state.dict3[key][0]['MD'] <= Bottom)]
+                    well_postcutoff_bottom =well_postcutoff_bottom.sort_values(by='MD')
+                    blank_row = pd.DataFrame({}, index=[0])
+                    well_postcutoff = pd.concat([well_postcutoff_OWC,blank_row, well_postcutoff_bottom]).reset_index(drop=True)
+                    summary_list = [Gross_Pay_Oil,Net_Pay_Oil,Porosity_Oil,Saturation_Oil,0,0,0,0]
+                    summary.extend(summary_list)
+                    session_state.dict_Pay_Parameter[key]=summary
 
                 
             
@@ -799,47 +800,7 @@ def page5():
                 well_postcutoff_GOC = well_postcutoff_GOC[well_postcutoff_GOC['Sw']<=S_W_Cut]
                 well_postcutoff_GOC =well_postcutoff_GOC.sort_values(by='MD')
                 post_cutoff_df = well_postcutoff_GOC
-                GOC = well_postcutoff_GOC['MD'].iloc[-1]
-                Net_Pay_gas = pay_calculator(well_postcutoff_GOC)
-                Porosity_gas = well_postcutoff_GOC['Pi'].mean()
-                Saturation_gas = well_postcutoff_GOC['Sw'].mean()
-                well_postcutoff_bottom = session_state.dict3[key][0][(session_state.dict3[key][0]['MD'] > GOC) & (session_state.dict3[key][0]['MD'] <= Bottom)]
-                well_postcutoff_bottom =well_postcutoff_bottom.sort_values(by='MD')
-                blank_row = pd.DataFrame({}, index=[0])
-                well_postcutoff = pd.concat([well_postcutoff_GOC,blank_row, well_postcutoff_bottom]).reset_index(drop=True)
-                summary_list = [0,0,0,0,Gross_Pay_gas,Net_Pay_gas,Porosity_gas,Saturation_gas]
-                summary.extend(summary_list)
-                session_state.dict_Pay_Parameter[key]=summary
-            
-                
-            elif R_Type=='OG':
-                if GOC==0:                
-                    well_postcutoff_OWC = session_state.dict3[key][0][(session_state.dict3[key][0]['MD'] >= Top) & (session_state.dict3[key][0]['MD'] <= OWC)]
-                    Gross_pay_Oil_df=well_postcutoff_OWC.sort_values(by = 'MD')
-                    Gross_Pay_Oil = pay_calculator(Gross_pay_Oil_df)
-                    well_postcutoff_OWC = well_postcutoff_OWC[well_postcutoff_OWC['Sw']<=S_W_Cut]
-                    well_postcutoff_OWC =well_postcutoff_OWC.sort_values(by='MD')
-                    post_cutoff_df = well_postcutoff_OWC
-                    OWC = well_postcutoff_OWC['MD'].iloc[-1]
-                    Net_Pay_Oil = pay_calculator(well_postcutoff_OWC)
-                    Porosity_Oil = well_postcutoff_OWC['Pi'].mean()
-                    Saturation_Oil = well_postcutoff_OWC['Sw'].mean()
-                    well_postcutoff_bottom = session_state.dict3[key][0][(session_state.dict3[key][0]['MD'] > OWC) & (session_state.dict3[key][0]['MD'] <= Bottom)]
-                    well_postcutoff_bottom =well_postcutoff_bottom.sort_values(by='MD')                
-                    blank_row = pd.DataFrame({}, index=[0])
-                    well_postcutoff = pd.concat([well_postcutoff_OWC,blank_row, well_postcutoff_bottom]).reset_index(drop=True)
-                    summary_list = [Gross_Pay_Oil,Net_Pay_Oil,Porosity_Oil,Saturation_Oil,0,0,0,0]
-                    summary.extend(summary_list)
-                    session_state.dict_Pay_Parameter[key]=summary
-            
-                    
-                elif OWC==0:
-                    well_postcutoff_GOC = session_state.dict3[key][0][(session_state.dict3[key][0]['MD'] >= Top) & (session_state.dict3[key][0]['MD'] <= GOC)]
-                    Gross_pay_gas_df=well_postcutoff_GOC.sort_values(by = 'MD')
-                    Gross_Pay_gas = pay_calculator(Gross_pay_gas_df)
-                    well_postcutoff_GOC = well_postcutoff_GOC[well_postcutoff_GOC['Sw']<=S_W_Cut]
-                    well_postcutoff_GOC =well_postcutoff_GOC.sort_values(by='MD')
-                    post_cutoff_df = well_postcutoff_GOC
+                if not well_postcutoff_GOC.empty:
                     GOC = well_postcutoff_GOC['MD'].iloc[-1]
                     Net_Pay_gas = pay_calculator(well_postcutoff_GOC)
                     Porosity_gas = well_postcutoff_GOC['Pi'].mean()
@@ -851,6 +812,49 @@ def page5():
                     summary_list = [0,0,0,0,Gross_Pay_gas,Net_Pay_gas,Porosity_gas,Saturation_gas]
                     summary.extend(summary_list)
                     session_state.dict_Pay_Parameter[key]=summary
+            
+                
+            elif R_Type=='OG':
+                if GOC==0:                
+                    well_postcutoff_OWC = session_state.dict3[key][0][(session_state.dict3[key][0]['MD'] >= Top) & (session_state.dict3[key][0]['MD'] <= OWC)]
+                    Gross_pay_Oil_df=well_postcutoff_OWC.sort_values(by = 'MD')
+                    Gross_Pay_Oil = pay_calculator(Gross_pay_Oil_df)
+                    well_postcutoff_OWC = well_postcutoff_OWC[well_postcutoff_OWC['Sw']<=S_W_Cut]
+                    well_postcutoff_OWC =well_postcutoff_OWC.sort_values(by='MD')
+                    post_cutoff_df = well_postcutoff_OWC
+                    if not well_postcutoff_OWC.empty:
+                        OWC = well_postcutoff_OWC['MD'].iloc[-1]
+                        Net_Pay_Oil = pay_calculator(well_postcutoff_OWC)
+                        Porosity_Oil = well_postcutoff_OWC['Pi'].mean()
+                        Saturation_Oil = well_postcutoff_OWC['Sw'].mean()
+                        well_postcutoff_bottom = session_state.dict3[key][0][(session_state.dict3[key][0]['MD'] > OWC) & (session_state.dict3[key][0]['MD'] <= Bottom)]
+                        well_postcutoff_bottom =well_postcutoff_bottom.sort_values(by='MD')                
+                        blank_row = pd.DataFrame({}, index=[0])
+                        well_postcutoff = pd.concat([well_postcutoff_OWC,blank_row, well_postcutoff_bottom]).reset_index(drop=True)
+                        summary_list = [Gross_Pay_Oil,Net_Pay_Oil,Porosity_Oil,Saturation_Oil,0,0,0,0]
+                        summary.extend(summary_list)
+                        session_state.dict_Pay_Parameter[key]=summary
+            
+                    
+                elif OWC==0:
+                    well_postcutoff_GOC = session_state.dict3[key][0][(session_state.dict3[key][0]['MD'] >= Top) & (session_state.dict3[key][0]['MD'] <= GOC)]
+                    Gross_pay_gas_df=well_postcutoff_GOC.sort_values(by = 'MD')
+                    Gross_Pay_gas = pay_calculator(Gross_pay_gas_df)
+                    well_postcutoff_GOC = well_postcutoff_GOC[well_postcutoff_GOC['Sw']<=S_W_Cut]
+                    well_postcutoff_GOC =well_postcutoff_GOC.sort_values(by='MD')
+                    post_cutoff_df = well_postcutoff_GOC
+                    if not well_postcutoff_GOC.empty:
+                        GOC = well_postcutoff_GOC['MD'].iloc[-1]
+                        Net_Pay_gas = pay_calculator(well_postcutoff_GOC)
+                        Porosity_gas = well_postcutoff_GOC['Pi'].mean()
+                        Saturation_gas = well_postcutoff_GOC['Sw'].mean()
+                        well_postcutoff_bottom = session_state.dict3[key][0][(session_state.dict3[key][0]['MD'] > GOC) & (session_state.dict3[key][0]['MD'] <= Bottom)]
+                        well_postcutoff_bottom =well_postcutoff_bottom.sort_values(by='MD')
+                        blank_row = pd.DataFrame({}, index=[0])
+                        well_postcutoff = pd.concat([well_postcutoff_GOC,blank_row, well_postcutoff_bottom]).reset_index(drop=True)
+                        summary_list = [0,0,0,0,Gross_Pay_gas,Net_Pay_gas,Porosity_gas,Saturation_gas]
+                        summary.extend(summary_list)
+                        session_state.dict_Pay_Parameter[key]=summary
                             
                 else:
                     
@@ -871,17 +875,18 @@ def page5():
                     well_postcutoff_OWC =well_postcutoff_OWC.sort_values(by='MD')
                     post_cutoff_df_2 = well_postcutoff_OWC
                     post_cutoff_df = pd.concat([post_cutoff_df_1,post_cutoff_df_2]).reset_index(drop=True)
-                    OWC = well_postcutoff_OWC['MD'].iloc[-1]
-                    Net_Pay_Oil = pay_calculator(well_postcutoff_OWC)
-                    Porosity_Oil = well_postcutoff_OWC['Pi'].mean()
-                    Saturation_Oil = well_postcutoff_OWC['Sw'].mean()
-                    blank_row_1 = pd.DataFrame({}, index=[0])
-                    well_postcutoff_bottom = session_state.dict3[key][0][(session_state.dict3[key][0]['MD'] > OWC) & (session_state.dict3[key][0]['MD'] <= Bottom)]
-                    well_postcutoff_bottom =well_postcutoff_bottom.sort_values(by='MD')
-                    well_postcutoff = pd.concat([well_postcutoff_GOC,blank_row,well_postcutoff_OWC,blank_row_1, well_postcutoff_bottom]).reset_index(drop=True)
-                    summary_list = [Gross_Pay_Oil ,Net_Pay_Oil,Porosity_Oil,Saturation_Oil,Gross_Pay_gas,Net_Pay_gas,Porosity_gas,Saturation_gas]
-                    summary.extend(summary_list)
-                    session_state.dict_Pay_Parameter[key]=summary
+                    if not well_postcutoff_OWC.empty:
+                        OWC = well_postcutoff_OWC['MD'].iloc[-1]
+                        Net_Pay_Oil = pay_calculator(well_postcutoff_OWC)
+                        Porosity_Oil = well_postcutoff_OWC['Pi'].mean()
+                        Saturation_Oil = well_postcutoff_OWC['Sw'].mean()
+                        blank_row_1 = pd.DataFrame({}, index=[0])
+                        well_postcutoff_bottom = session_state.dict3[key][0][(session_state.dict3[key][0]['MD'] > OWC) & (session_state.dict3[key][0]['MD'] <= Bottom)]
+                        well_postcutoff_bottom =well_postcutoff_bottom.sort_values(by='MD')
+                        well_postcutoff = pd.concat([well_postcutoff_GOC,blank_row,well_postcutoff_OWC,blank_row_1, well_postcutoff_bottom]).reset_index(drop=True)
+                        summary_list = [Gross_Pay_Oil ,Net_Pay_Oil,Porosity_Oil,Saturation_Oil,Gross_Pay_gas,Net_Pay_gas,Porosity_gas,Saturation_gas]
+                        summary.extend(summary_list)
+                        session_state.dict_Pay_Parameter[key]=summary
 
             session_state.dict4[key]=well_postcutoff.iloc[:,0:4]
             session_state.dict5[key]=post_cutoff_df.iloc[:,0:4]
