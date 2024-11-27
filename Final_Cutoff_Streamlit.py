@@ -761,7 +761,6 @@ def page5():
                 dummy_OWC['TVD'] = session_state.interval_[i]* np.cos(np.deg2rad(dummy_OWC['DEVIATION_ANGLE']))
             pay = dummy_OWC['TVD'].sum()
             return pay
-        well_postcutoff = pd.DataFrame()
         for i,((key,value),(Key1, value1)) in enumerate(zip(session_state.dict3.items(),session_state.dict_wells.items())):
             Top = value1[0]
             GOC=  value1[1]
@@ -892,18 +891,9 @@ def page5():
                     well_postcutoff = pd.concat([well_postcutoff_GOC,blank_row,well_postcutoff_OWC,blank_row_1, well_postcutoff_bottom]).reset_index(drop=True)
                     summary_list = [Gross_Pay_Oil ,Net_Pay_Oil,Porosity_Oil,Saturation_Oil,Gross_Pay_gas,Net_Pay_gas,Porosity_gas,Saturation_gas]
                     summary.extend(summary_list)
-                    session_state.dict_Pay_Parameter[key]=summary
-
-            if not well_postcutoff.empty:
-                session_state.dict4[key] = well_postcutoff.iloc[:, 0:4]
-            else:
-                session_state.dict4[key] = pd.DataFrame(columns=well_postcutoff.columns[:4])
-
-            # Similarly handle dict5
-            if not post_cutoff_df.empty:
-                session_state.dict5[key] = post_cutoff_df.iloc[:, 0:4]
-            else:
-                session_state.dict5[key] = pd.DataFrame(columns=post_cutoff_df.columns[:4])
+                    session_state.dict_Pay_Parameter[key]=summary        
+            session_state.dict4[key] = well_postcutoff.iloc[:, 0:4]
+            session_state.dict5[key] = post_cutoff_df.iloc[:, 0:4]
         session_state.df_final=pd.DataFrame.from_dict(session_state.dict_Pay_Parameter,orient='index')
         session_state.df_final.columns= ['Gross_Pay_Oil' ,'Net_Pay_Oil','Porosity_Oil','Saturation_Oil','Gross_Pay_Gas','Net_Pay_Gas','Porosity_Gas','Saturation_Gas']
         return session_state.df_final
