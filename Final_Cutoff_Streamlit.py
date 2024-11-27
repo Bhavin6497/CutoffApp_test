@@ -894,8 +894,16 @@ def page5():
                     summary.extend(summary_list)
                     session_state.dict_Pay_Parameter[key]=summary
 
-            session_state.dict4[key]=well_postcutoff.iloc[:,0:4]
-            session_state.dict5[key]=post_cutoff_df.iloc[:,0:4]
+            if not well_postcutoff.empty:
+                session_state.dict4[key] = well_postcutoff.iloc[:, 0:4]
+            else:
+                session_state.dict4[key] = pd.DataFrame(columns=well_postcutoff.columns[:4])
+
+            # Similarly handle dict5
+            if not post_cutoff_df.empty:
+                session_state.dict5[key] = post_cutoff_df.iloc[:, 0:4]
+            else:
+                session_state.dict5[key] = pd.DataFrame(columns=post_cutoff_df.columns[:4])
         session_state.df_final=pd.DataFrame.from_dict(session_state.dict_Pay_Parameter,orient='index')
         session_state.df_final.columns= ['Gross_Pay_Oil' ,'Net_Pay_Oil','Porosity_Oil','Saturation_Oil','Gross_Pay_Gas','Net_Pay_Gas','Porosity_Gas','Saturation_Gas']
         return session_state.df_final
