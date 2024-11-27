@@ -761,7 +761,7 @@ def page5():
                 dummy_OWC['TVD'] = session_state.interval_[i]* np.cos(np.deg2rad(dummy_OWC['DEVIATION_ANGLE']))
             pay = dummy_OWC['TVD'].sum()
             return pay
-        
+        well_postcutoff = pd.DataFrame()
         for i,((key,value),(Key1, value1)) in enumerate(zip(session_state.dict3.items(),session_state.dict_wells.items())):
             Top = value1[0]
             GOC=  value1[1]
