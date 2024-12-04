@@ -926,7 +926,7 @@ def page5():
         st.write(session_state.df_final)   
 
         
-       def load_workbook_from_file(file):
+        def load_workbook_from_file(file):
             """Loads an Excel workbook from a file-like object."""
             return load_workbook(io.BytesIO(file.read()), data_only=False)
 
