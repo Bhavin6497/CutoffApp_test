@@ -925,95 +925,98 @@ def page5():
     with tab2:           
         st.write(session_state.df_final)   
 
+        
+        # Function to load workbook from a file-like object
         def load_workbook_from_file(file):
-            """Loads an Excel workbook from a file-like object."""
-            return load_workbook(io.BytesIO(file.read()), data_only=False)
-
+            with xw.App(visible=False) as app:
+                wb = app.books.open(file=file)
+                return wb
+        
+        # Function to save workbook to BytesIO
         def save_workbook_to_bytes(wb):
-            """Saves a workbook to a BytesIO object."""
             output = io.BytesIO()
-            wb.save(output)
+            temp_path = "temp.xlsx"
+            wb.save(temp_path)
+            wb.close()
+            with open(temp_path, "rb") as f:
+                output.write(f.read())
             output.seek(0)
             return output
-
-        def force_recalculate(wb):
-            """Force Excel to recalculate formulas when the workbook is opened."""
-            wb.properties.calcMode = 'auto'
-            wb.properties.calcId = 0
-
+        
+        # Function to clear a range of cells
+        def clear_range(sheet, range_address):
+            sheet.range(range_address).clear_contents()
+        
+        # Function to replace text in a specific row
         def replace_in_row(sheet, row_number, old_text, new_text):
-            """Replace occurrences of old_text with new_text in a specific row."""
-            for cell in sheet[row_number]:
+            for cell in sheet.range(f"A{row_number}:Z{row_number}"):
                 if cell.value and isinstance(cell.value, str) and old_text in cell.value:
                     cell.value = cell.value.replace(old_text, new_text)
-
-        uploaded_file = st.file_uploader("Choose the Post_cutoff excel file", type='xlsx')
-        if uploaded_file is not None:
+        
+        # Streamlit file uploader
+        uploaded_file = st.file_uploader("Choose the Post_cutoff Excel file", type="xlsx")
+        
+        if uploaded_file:
             try:
+                # Load the workbook using xlwings
                 wb = load_workbook_from_file(uploaded_file)
-
-                # Log existing sheet names for debugging
-                existing_sheets = wb.sheetnames
-
+        
                 # Assuming session_state.dict4 contains the new sheet names
                 sheet_name_mapping = {}
                 for i, ((key, value), (Key1, value1)) in enumerate(zip(session_state.dict4.items(), session_state.dict_wells.items())):
-                    old_name = f'Sheet{i+1}'
+                    old_name = f"Sheet{i+1}"
                     new_name = key
                     sheet_name_mapping[old_name] = new_name
-
-                    if old_name in wb.sheetnames:
-                        sheet = wb[old_name]
-                        sheet.title = new_name
+        
+                    if old_name in [sheet.name for sheet in wb.sheets]:
+                        sheet = wb.sheets[old_name]
+                        sheet.name = new_name
                     else:
                         st.error(f"Sheet '{old_name}' does not exist in the workbook.")
-
+                        continue
+        
                     # Clear range A2:D*
-                    for row in sheet.iter_rows(min_row=2, max_row=sheet.max_row, min_col=1, max_col=4):
-                        for cell in row:
-                            cell.value = None
-
+                    clear_range(sheet, "A2:D1048576")
+        
                     # Set new values in range A2:D*
                     for row_idx, row_value in enumerate(session_state.dict4[key].values.tolist(), start=2):
-                        for col_idx, cell_value in enumerate(row_value, start=1):
-                            sheet.cell(row=row_idx, column=col_idx, value=cell_value)
-
-                    sheet['P2'].value = round(session_state.interval_[i], 4)
-                    sheet['O2'].value = key
-                    sheet['O3'].value = 'Reservoir_Type'
-                    sheet['P3'].value = value1[6]
-                    sheet['O4'].value = 'GOC'
-                    sheet['P4'].value = value1[1]
-                    sheet['O5'].value = 'OWC'
-                    sheet['P5'].value = value1[2]
-                    sheet['S21'].value = value1[4]
-                    sheet['T21'].value = value1[5]
-                    sheet['P6'].value = session_state.dict_Pay_Parameter[key][4]
-                    sheet['P7'].value = session_state.dict_Pay_Parameter[key][0]
-                    sheet['P8'].value = value1[0]
-                    sheet['P9'].value = value1[3]
-
+                        sheet.range(f"A{row_idx}").value = row_value
+        
+                    # Populate specific cells
+                    sheet.range("P2").value = round(session_state.interval_[i], 4)
+                    sheet.range("O2").value = key
+                    sheet.range("O3").value = "Reservoir_Type"
+                    sheet.range("P3").value = value1[6]
+                    sheet.range("O4").value = "GOC"
+                    sheet.range("P4").value = value1[1]
+                    sheet.range("O5").value = "OWC"
+                    sheet.range("P5").value = value1[2]
+                    sheet.range("S21").value = value1[4]
+                    sheet.range("T21").value = value1[5]
+                    sheet.range("P6").value = session_state.dict_Pay_Parameter[key][4]
+                    sheet.range("P7").value = session_state.dict_Pay_Parameter[key][0]
+                    sheet.range("P8").value = value1[0]
+                    sheet.range("P9").value = value1[3]
+        
                     # Set new values in range I24:K*
                     for row_idx, row_value in enumerate(value1[7].values.tolist(), start=24):
-                        for col_idx, cell_value in enumerate(row_value, start=9):
-                            sheet.cell(row=row_idx, column=col_idx, value=cell_value)
+                        sheet.range(f"I{row_idx}").value = row_value
+        
                 # Update references in the summary sheet
-                summary_sheet = wb['Summary']
-                for i,(old_name, new_name) in enumerate(sheet_name_mapping.items()):
-                    replace_in_row(summary_sheet, i+4, old_name, new_name)
-                # Force Excel to recalculate formulas
-                force_recalculate(wb)
-
+                summary_sheet = wb.sheets["Summary"]
+                for i, (old_name, new_name) in enumerate(sheet_name_mapping.items()):
+                    replace_in_row(summary_sheet, i + 4, old_name, new_name)
+        
+                # Save and prepare for download
                 updated_file = save_workbook_to_bytes(wb)
                 st.download_button(
                     label="Download File",
                     data=updated_file,
                     file_name="postcutoff_Data.xlsx",
-                    mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
             except Exception as e:
                 st.error(f"An error occurred: {e}")
-    
     with tab3:
         def y_values_creator(data_dict):
             list = []
