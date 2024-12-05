@@ -927,58 +927,59 @@ def page5():
 
         
         def load_workbook_from_file(file):
-            """Loads an Excel workbook from a file-like object."""
-            return load_workbook(io.BytesIO(file.read()), data_only=False)
-
+            """Loads an Excel workbook (macro-enabled or standard) from a file-like object."""
+            return load_workbook(io.BytesIO(file.read()), data_only=False, keep_vba=True)
+        
         def save_workbook_to_bytes(wb):
             """Saves a workbook to a BytesIO object."""
             output = io.BytesIO()
             wb.save(output)
             output.seek(0)
             return output
-
+        
         def force_recalculate(wb):
             """Force Excel to recalculate formulas when the workbook is opened."""
             wb.properties.calcMode = 'auto'
             wb.properties.calcId = 0
-
+        
         def replace_in_row(sheet, row_number, old_text, new_text):
             """Replace occurrences of old_text with new_text in a specific row."""
             for cell in sheet[row_number]:
                 if cell.value and isinstance(cell.value, str) and old_text in cell.value:
                     cell.value = cell.value.replace(old_text, new_text)
-
-        uploaded_file = st.file_uploader("Choose the Post_cutoff excel file", type='xlsx')
+        
+        # Streamlit file uploader
+        uploaded_file = st.file_uploader("Choose the Post_cutoff Excel file", type=['xlsx', 'xlsm'])
         if uploaded_file is not None:
             try:
                 wb = load_workbook_from_file(uploaded_file)
-
+        
                 # Log existing sheet names for debugging
                 existing_sheets = wb.sheetnames
-
+        
                 # Assuming session_state.dict4 contains the new sheet names
                 sheet_name_mapping = {}
                 for i, ((key, value), (Key1, value1)) in enumerate(zip(session_state.dict4.items(), session_state.dict_wells.items())):
                     old_name = f'Sheet{i+1}'
                     new_name = key
                     sheet_name_mapping[old_name] = new_name
-
+        
                     if old_name in wb.sheetnames:
                         sheet = wb[old_name]
                         sheet.title = new_name
                     else:
                         st.error(f"Sheet '{old_name}' does not exist in the workbook.")
-
+        
                     # Clear range A2:D*
                     for row in sheet.iter_rows(min_row=2, max_row=sheet.max_row, min_col=1, max_col=4):
                         for cell in row:
                             cell.value = None
-
+        
                     # Set new values in range A2:D*
                     for row_idx, row_value in enumerate(session_state.dict4[key].values.tolist(), start=2):
                         for col_idx, cell_value in enumerate(row_value, start=1):
                             sheet.cell(row=row_idx, column=col_idx, value=cell_value)
-
+        
                     sheet['P2'].value = round(session_state.interval_[i], 4)
                     sheet['O2'].value = key
                     sheet['O3'].value = 'Reservoir_Type'
@@ -993,24 +994,26 @@ def page5():
                     sheet['P7'].value = session_state.dict_Pay_Parameter[key][0]
                     sheet['P8'].value = value1[0]
                     sheet['P9'].value = value1[3]
-
+        
                     # Set new values in range I24:K*
                     for row_idx, row_value in enumerate(value1[7].values.tolist(), start=24):
                         for col_idx, cell_value in enumerate(row_value, start=9):
                             sheet.cell(row=row_idx, column=col_idx, value=cell_value)
+                
                 # Update references in the summary sheet
                 summary_sheet = wb['Summary']
-                for i,(old_name, new_name) in enumerate(sheet_name_mapping.items()):
+                for i, (old_name, new_name) in enumerate(sheet_name_mapping.items()):
                     replace_in_row(summary_sheet, i+4, old_name, new_name)
+        
                 # Force Excel to recalculate formulas
                 force_recalculate(wb)
-
+        
                 updated_file = save_workbook_to_bytes(wb)
                 st.download_button(
                     label="Download File",
                     data=updated_file,
-                    file_name="postcutoff_Data.xlsx",
-                    mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                    file_name="postcutoff_Data.xlsm",  # Keep the .xlsm extension for macro-enabled files
+                    mime='application/vnd.ms-excel.sheet.macroEnabled.12'
                 )
             except Exception as e:
                 st.error(f"An error occurred: {e}")
