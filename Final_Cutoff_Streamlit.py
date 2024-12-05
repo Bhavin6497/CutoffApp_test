@@ -1000,10 +1000,6 @@ def page5():
                         for col_idx, cell_value in enumerate(row_value, start=9):
                             sheet.cell(row=row_idx, column=col_idx, value=cell_value)
                 
-                # Update references in the summary sheet
-                summary_sheet = wb['Summary']
-                for i, (old_name, new_name) in enumerate(sheet_name_mapping.items()):
-                    replace_in_row(summary_sheet, i+4, old_name, new_name)
         
                 # Force Excel to recalculate formulas
                 force_recalculate(wb)
