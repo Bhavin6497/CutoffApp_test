@@ -266,9 +266,9 @@ def page0():
                 # Sort the list of files alphabetically
                 files = sorted(session_state.files, key=lambda x: x.name)
                 
-                porosity_options = ['PIGE_QEPP', 'PIGE', 'PHIE_F', 'PHIE', 'PIGE_F']
-                saturation_options = ['SUWI', 'SW_F', 'SW', 'SUWI_QEPP', 'sw', 'Sw_F','SWE']
-                vcl_options = ['VCL', 'VCL_F', 'VCL_QEPP', 'VCL_GEO_QEPP','VSH']
+                porosity_options = ['PIGE_QEPP', 'PIGE', 'PHIE_F', 'PHIE', 'PIGE_F','PHIE_Final']
+                saturation_options = ['SUWI', 'SW_F', 'SW', 'SUWI_QEPP', 'sw', 'Sw_F','SWE','SWE_Final']
+                vcl_options = ['VCL', 'VCL_F', 'VCL_QEPP', 'VCL_GEO_QEPP','VSH','VSH_Final']
                 depth_options = ['DEPT', 'MD', 'DEPTH']
                 
                 session_state.dfs = {}  # Initialize the dfs dictionary in session_state
