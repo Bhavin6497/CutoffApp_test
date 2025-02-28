@@ -427,7 +427,7 @@ def page1():
             min_ = df['MD'].iloc[(df['MD'] - target_value_).abs().idxmin()]
             max_ = df['MD'].iloc[(df['MD'] - target_value).abs().idxmin()]
             df = df.dropna().copy()
-            condition = (df['MD'] > min_) & (df['MD'] < max_)
+            condition = (df['MD'] >= min_) & (df['MD'] < max_)
             df = df[condition]
             df = df.sort_values(by='MD')
             session_state.dict_Rawdataframe[Name] = df
