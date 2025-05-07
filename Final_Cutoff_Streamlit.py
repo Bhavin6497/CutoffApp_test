@@ -346,61 +346,52 @@ def page0():
 def page01():       
     # Initialize Dev_data dictionary
     session_state = get_session_state()
-    Dev_data = {}
+    well_list = list(session_state.dict_wells.keys())
+    COLUMNS = ['MD', 'DEVIATION_ANGLE', 'TVD']
 
-    def create_empty_df(rows, cols):
-        return pd.DataFrame('', index=range(rows), columns=cols)
+    selected_well = st.selectbox("Select a Well", well_list)
 
-    # Create empty dataframes for each well
-    for key in session_state.dict_wells.keys():
-        Dev_data[key] = create_empty_df(50, ['MD', 'DEVIATION_ANGLE', 'TVD'])
-
-    # Initialize session state variables if they don't exist
-    if 'form_data' not in st.session_state:
-        st.session_state.form_data = Dev_data
-
-    if 'current_option' not in st.session_state:
-        st.session_state.current_option = None
-
-    # Select box for form options
-    option = st.selectbox(
-        "Select the appropriate Well",
-        session_state.dict_wells.keys(),
-        key="form_option"
+    if "well_data" not in session_state:
+        session_state.well_data = {well: pd.DataFrame(columns=COLUMNS) for well in well_list}
+    
+    def clean_pasted_data(df):
+        if df.shape[1] > 3:
+            df = df.iloc[:, :3]
+        df.columns = COLUMNS
+        df = df.dropna(how='all').replace('', pd.NA).dropna(how='all')
+        return df
+    
+    edited_df = st.data_editor(
+    session_state.well_data[selected_well],
+    column_order=COLUMNS,
+    num_rows="dynamic",
+    use_container_width=True,
+    key=f"editor_{selected_well}"
     )
 
-    # Update the current option and data
-    if option != st.session_state.current_option:
-        st.session_state.current_option = option
-        st.session_state.data = st.session_state.form_data[option]
+        # Buttons: Submit and Clear
+    col1, col2 = st.columns([1, 1])
 
-    # Configure the Ag-Grid options
-    gb = GridOptionsBuilder.from_dataframe(st.session_state.data)
-    gb.configure_default_column(editable=True)
-    gb.configure_grid_options(enableRangeSelection=True)
-    grid_options = gb.build()
+    with col1:
+        if st.button("Submit"):
+            df = pd.DataFrame(edited_df)
+            df = clean_pasted_data(df)
+            session_state.well_data[selected_well] = df
+            st.success(f"Data for {selected_well} submitted successfully!")
 
-    # Display the Ag-Grid
-    grid_response = AgGrid(st.session_state.data, gridOptions=grid_options, update_mode=GridUpdateMode.VALUE_CHANGED)
-
-    # Update the session state data with the edited grid data
-    st.session_state.data = grid_response['data']
-
-    # Submit button
-    if st.button('Submit'):
-        # Convert the data to a DataFrame and remove rows where all values are None or empty
-        df = pd.DataFrame(st.session_state.data)
-        df = df.dropna(how='all').replace('', pd.NA).dropna(how='all')
-        st.session_state.form_data[option] = df
-        st.success(f"Data for {option} submitted successfully!")
+    with col2:
+        if st.button("Clear"):
+            session_state.well_data[selected_well] = pd.DataFrame(columns=COLUMNS)
+            st.success(f"Data for {selected_well} cleared!")
+            st.experimental_rerun()
 
     # Iterate over the dict_wells and update with form_data
     index = 7
     for key in session_state.dict_wells.keys():
         if index < len(session_state.dict_wells[key]):
-            session_state.dict_wells[key][index] = st.session_state.form_data[key]
+            session_state.dict_wells[key][index] = session_state.well_data[key]
         else:
-            session_state.dict_wells[key].append(st.session_state.form_data[key])
+            session_state.dict_wells[key].append(session_state.well_data[key])
 
     # Perform data cleaning and type conversion
     for key, value in session_state.dict_wells.items():
@@ -409,11 +400,7 @@ def page01():
             value[index] = value[index].astype(float)
         else:
             value[index] = value[index].astype(float)
-    
-    
-        
           
-        
 def page1():
     session_state = get_session_state()
     st.success('DISPLAY THE RAW DATA')
