@@ -351,40 +351,58 @@ def page01():
 
     selected_well = st.selectbox("Select a Well", well_list)
 
+     #Initialize well data
     if "well_data" not in session_state:
         session_state.well_data = {well: pd.DataFrame(columns=COLUMNS) for well in well_list}
-    
+
     def clean_pasted_data(df):
         if df.shape[1] > 3:
             df = df.iloc[:, :3]
         df.columns = COLUMNS
         df = df.dropna(how='all').replace('', pd.NA).dropna(how='all')
         return df
-    
-    edited_df = st.data_editor(
-    session_state.well_data[selected_well],
-    column_order=COLUMNS,
-    num_rows="dynamic",
-    use_container_width=True,
-    key=f"editor_{selected_well}"
-    )
 
-        # Buttons: Submit and Clear
-    col1, col2 = st.columns([1, 1])
+    # Track changes to force rerender
+    if "editor_counter" not in session_state:
+        session_state.editor_counter = 0
 
-    with col1:
-        if st.button("Submit"):
-            df = pd.DataFrame(edited_df)
-            df = clean_pasted_data(df)
-            session_state.well_data[selected_well] = df
-            st.success(f"Data for {selected_well} submitted successfully!")
+    # Left column for editor + buttons
+    left, _ = st.columns([1, 1])
 
-    with col2:
-        if st.button("Clear"):
-            session_state.well_data[selected_well] = pd.DataFrame(columns=COLUMNS)
-            st.success(f"Data for {selected_well} cleared!")
-            st.experimental_rerun()
+    with left:
+        editor_key = f"editor_{selected_well}_{session_state.editor_counter}"
 
+        edited_df = st.data_editor(
+            session_state.well_data[selected_well],
+            column_order=COLUMNS,
+            num_rows="dynamic",
+            use_container_width=True,
+            key=editor_key
+        )
+
+        col1, col2 = st.columns([1, 1])
+        submit_success = False
+        clear_success = False
+
+        with col1:
+            if st.button("✅ Submit", use_container_width=True):
+                df = pd.DataFrame(edited_df)
+                df = clean_pasted_data(df)
+                session_state.well_data[selected_well] = df
+                submit_success = True
+
+        with col2:
+            if st.button("🗑️ Clear", use_container_width=True):
+                session_state.well_data[selected_well] = pd.DataFrame(columns=COLUMNS)
+                session_state.editor_counter += 1  # Force key change
+                clear_success = True
+                st.experimental_rerun()
+
+    # Full width messages
+    if submit_success:
+        st.success(f"Data for {selected_well} submitted successfully!")
+    if clear_success:
+        st.success(f"Data for {selected_well} cleared!")
     # Iterate over the dict_wells and update with form_data
     index = 7
     for key in session_state.dict_wells.keys():
@@ -400,6 +418,7 @@ def page01():
             value[index] = value[index].astype(float)
         else:
             value[index] = value[index].astype(float)
+    
           
 def page1():
     session_state = get_session_state()
