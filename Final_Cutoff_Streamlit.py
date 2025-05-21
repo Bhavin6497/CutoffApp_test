@@ -45,7 +45,8 @@ def get_session_state():
     if 'Porosity_Cutoff_df' not in st.session_state:
         st.session_state['Porosity_Cutoff_df']= None
     if 'Top_Bot' not in st.session_state:
-        st.session_state.Top_Bot= {}
+        COLUMNS = ['WELL', 'SAND_TOP', 'GOC', 'OWC', 'SAND_BOTTOM', 'PERF_TOP', 'PERF_BOTTOM', 'R_TYPE']
+        st.session_state.Top_Bot = pd.DataFrame(columns=COLUMNS)
     if 'error_dfs' not in st.session_state:
         st.session_state.error_dfs= {}
     if 'dict_wells' not in st.session_state:
@@ -57,7 +58,8 @@ def get_session_state():
     if 'dfs' not in st.session_state:
         st.session_state.dfs = {}
     if 'updated_df' not in st.session_state:
-        st.session_state.updated_df = None
+        COLUMNS = ["VCLAY_CUTOFF" ,"POROSITY_CUTOFF" , "SATURATION_CUTOFF"]
+        st.session_state.updated_df = pd.DataFrame(columns=COLUMNS)
     if 'cases' not in st.session_state:
         st.session_state.cases = {}
     if 'df_final_case' not in st.session_state:
@@ -199,38 +201,69 @@ def convert_dfs_to_excel(dfs):
     
     return final_output.getvalue()
 
-def cutoff_entry_form(Property,Defaultvalue,dictany):
-    session_state = get_session_state()
-    prefilled_values = dictany.keys()
-    default_value = st.text_input(f"Enter the {Property}_Cutoff", Defaultvalue)
-    default_value = float(default_value)
-    data = {
-            "Well": prefilled_values,
-            f"{Property}_Cutoff": [default_value] * len(prefilled_values)
-            }
-    df = pd.DataFrame(data)
+def cutoff_entry_form(Property, Defaultvalue, dictany):
+    session_state = st.session_state
+    prefilled_values = list(dictany.keys())
+    column_name = f"{Property}_Cutoff"
+    COLUMNS = ['Well', column_name]
 
-
-    # Create a GridOptionsBuilder object
-    gb = GridOptionsBuilder.from_dataframe(df)
-    gb.configure_default_column(editable=True)  # Make all columns editable
-
-    # Configure specific columns
-    gb.configure_column("Well", editable=False)  # Make prefilled column non-editable
-    gb.configure_column(f"{Property}_Cutoff", editable=True)  # Make user input column editable
-
-    # Use the AgGrid component to display the grid
-    grid_options = gb.build()
-    grid_response = AgGrid(df, gridOptions=grid_options, editable=True,enable_enterprise_modules=False)
-
-    # Get the updated DataFrame after user edits
-    updated_df = grid_response['data']
-    session_state[f"{Property}_Cutoff_df"] = updated_df
-    if st.button("Submit"):
-        # Save the updated DataFrame to session state
-        st.success(f"{Property} Cutoff values have been submitted.")
+    # Input for default cutoff value
+    default_str = st.text_input(f"Enter the {Property} Cutoff", str(Defaultvalue), key=f"default_{Property}")
     
+    try:
+        default_value = float(default_str)
+    except ValueError:
+        st.warning("Please enter a valid number for cutoff.")
+        return pd.DataFrame()
+
+    # Track previous default value separately for each Property
+    prev_default_key = f"prev_default_{Property}"
+    data_key = f"{Property}_data"
+
+    if prev_default_key not in session_state:
+        session_state[prev_default_key] = default_value
+
+    # Initialize or update session state when default value changes
+    if data_key not in session_state or default_value != session_state[prev_default_key]:
+        session_state[data_key] = {
+            "Well": prefilled_values,
+            column_name: [default_value] * len(prefilled_values)
+        }
+        session_state[prev_default_key] = default_value
+
+    df = pd.DataFrame(session_state[data_key])
+
+    # Clean pasted or edited data
+    def clean_pasted_data(df):
+        if df.shape[1] > 2:
+            df = df.iloc[:, :2]
+        df.columns = COLUMNS
+        df = df.dropna(how='all').replace('', pd.NA).dropna(how='all')
+        return df
+
+    # Editable data editor with scoped keys
+    edited_df = st.data_editor(
+        df,
+        column_order=COLUMNS,
+        num_rows="dynamic",
+        use_container_width=True,
+        key=f"data_editor_{Property}",
+        column_config={
+            "Well": st.column_config.TextColumn(disabled=True),
+            column_name: st.column_config.NumberColumn(disabled=False),
+        }
+    )
+
+    updated_df = pd.DataFrame(edited_df)
+    session_state[f"{Property}_Cutoff_df"] = updated_df
+
+    if st.button("Submit", key=f"submit_{Property}"):
+        cleaned_df = clean_pasted_data(updated_df)
+        session_state[data_key] = cleaned_df.to_dict(orient='list')
+        st.success(f"{Property} Cutoff values have been submitted.")
+
     return updated_df
+
             
 def page0():
     session_state = get_session_state()
@@ -239,26 +272,68 @@ def page0():
     with tab1:
         # File uploader for .csv or .las files, allowing multiple file uploads
         session_state.files = st.file_uploader("Choose files", type=["las"], accept_multiple_files=True)
+        COLUMNS = ['WELL', 'SAND_TOP', 'GOC', 'OWC','SAND_BOTTOM','PERF_TOP','PERF_BOTTOM','R_TYPE']
+          # Track clear action
+        if "clear_triggered" not in session_state:
+            session_state.clear_triggered = False
         
-        default_col_titles = ['WELL', 'SAND_TOP', 'GOC', 'OWC','SAND_BOTTOM','PERF_TOP','PERF_BOTTOM','R_TYPE']
-        col_titles = st.text_input(" ", ", ".join(default_col_titles))
-        if col_titles:
-            col_titles = col_titles.split(",")
-        data = st.text_area(" ")
-        if st.button("Submit"):
-            if data:
-                try:
-                    session_state.Top_Bot = pd.read_csv(io.StringIO(data), sep="\t", header=None)
-                    if col_titles:
-                        session_state.Top_Bot.columns = col_titles
-                    st.write("Here is your data:")
-                    st.dataframe(session_state.Top_Bot)
-                    session_state.Top_Bot['WELL'].sort_values()
+        if session_state.Top_Bot.empty or session_state.clear_triggered:
+            session_state.Top_Bot = pd.DataFrame([[""] * len(COLUMNS)] * 5, columns=COLUMNS)
+        
+        data_editor_key = f"editor_{'cleared' if session_state.clear_triggered else 'active'}"
+
+        def clean_pasted_data(df):
+            if df.shape[1] > 8:
+                df = df.iloc[:, :8]
+            df.columns = COLUMNS
+            df = df.dropna(how='all').replace('', pd.NA).dropna(how='all')
+            for col in ['SAND_TOP', 'GOC', 'OWC','SAND_BOTTOM','PERF_TOP','PERF_BOTTOM']:
+                df[col] = pd.to_numeric(df[col], errors='coerce')  # converts to float, sets invalid to NaN
+                df['WELL'] = df['WELL'].astype(str)
+                df['R_TYPE'] = df['R_TYPE'].astype(str)
+            return df
+
+        # Editable data editor with scoped keys
+        edited_df = st.data_editor(
+            session_state.Top_Bot,
+            column_order=COLUMNS,
+            num_rows="dynamic",
+            use_container_width=True,
+            key=data_editor_key,
+            hide_index=True    
+        )
+      
+
+        # Outer layout for buttons in left 1/4th
+        left_col, _, _, _ = st.columns([1, 1, 1, 1])
+
+        with left_col:
+            col1, col2 = st.columns([1, 1])  # Button layout
+
+            submit_success = False
+            clear_success = False
+
+            with col1:
+                if st.button("✅ Submit", use_container_width=True):
+                    df = pd.DataFrame(edited_df)
+                    df = clean_pasted_data(df)
+                    session_state.Top_Bot = df
                     session_state.dict_wells = session_state.Top_Bot.set_index('WELL').T.to_dict('list')
-                except Exception as e:
-                    st.error(f"Error reading data: {e}")
-            else:
-                st.warning("Please paste some data into the text area.")
+                    submit_success = True
+                    session_state.clear_triggered = False  # Reset clear state
+
+            with col2:
+                if st.button("🗑️ Clear", use_container_width=True):
+                    session_state.Top_Bot = pd.DataFrame([[""] * len(COLUMNS)] * 5, columns=COLUMNS)
+                    session_state.clear_triggered = True
+                    clear_success = True
+                    st.rerun()
+                    
+        if submit_success:
+            st.success(f"Data submitted successfully!")
+        if clear_success:
+            st.success(f"Data cleared!")
+                    
             
         wells = list(session_state.dict_wells.keys())
         if st.button("Autodetect"):
@@ -353,7 +428,7 @@ def page01():
 
      #Initialize well data
     if "well_data" not in session_state:
-        session_state.well_data = {well: pd.DataFrame(columns=COLUMNS) for well in well_list}
+        session_state.well_data = {well: pd.DataFrame([[""] * len(COLUMNS)] * 5,columns=COLUMNS) for well in well_list}
 
     def clean_pasted_data(df):
         if df.shape[1] > 3:
@@ -393,10 +468,10 @@ def page01():
 
         with col2:
             if st.button("🗑️ Clear", use_container_width=True):
-                session_state.well_data[selected_well] = pd.DataFrame(columns=COLUMNS)
+                session_state.well_data[selected_well] = pd.DataFrame([[""] * len(COLUMNS)] * 5,columns=COLUMNS)
                 session_state.editor_counter += 1  # Force key change
                 clear_success = True
-                st.experimental_rerun()
+                st.rerun()
 
     # Full width messages
     if submit_success:
@@ -418,7 +493,6 @@ def page01():
             value[index] = value[index].astype(float)
         else:
             value[index] = value[index].astype(float)
-    
           
 def page1():
     session_state = get_session_state()
@@ -1104,25 +1178,50 @@ def page6():
     
     tab1, tab2 = st.tabs(["SENSITIVITY_DATA", "SENSITIVITY_PLOT"])
     with tab1:
-        df = pd.DataFrame('', index=range(20), columns=["VCLAY_CUTOFF" ,"POROSITY_CUTOFF" , "SATURATION_CUTOFF"])
-        # Create a GridOptionsBuilder object
-        gb = GridOptionsBuilder.from_dataframe(df)
-        gb.configure_default_column(editable=True)
-        gb.configure_grid_options(enableRangeSelection=True)
-        grid_options = gb.build()
-        grid_response = AgGrid(df, gridOptions=grid_options, editable=True)
+        COLUMNS=["VCLAY_CUTOFF" ,"POROSITY_CUTOFF" , "SATURATION_CUTOFF"]
 
-            # Get the updated DataFrame after user edits
-        session_state.updated_df = grid_response['data']
-           
-        if st.button("Submit"):
-            session_state.updated_df = session_state.updated_df.dropna(how='all').replace('', pd.NA).dropna(how='all')
-            session_state.updated_df=session_state.updated_df.drop_duplicates()
-            session_state.No_of_rows=session_state.updated_df.shape[0]
-            st.write(session_state.updated_df)
-            
+        
+        if session_state.updated_df.empty:
+           session_state.updated_df = pd.DataFrame([[""] * len(COLUMNS)] * 10, columns=COLUMNS)
+        
 
+        def clean_pasted_data(df):
+            if df.shape[1] > 3:
+                df = df.iloc[:, :3]
+            df.columns = COLUMNS
+            df = df.dropna(how='all').replace('', pd.NA).dropna(how='all')
+            for col in ["VCLAY_CUTOFF" ,"POROSITY_CUTOFF" , "SATURATION_CUTOFF"]:
+                df[col] = pd.to_numeric(df[col], errors='coerce')  # converts to float, sets invalid to NaN
+            return df
 
+        # Editable data editor with scoped keys
+        edited_df = st.data_editor(
+            session_state.updated_df,
+            column_order=COLUMNS,
+            num_rows="dynamic",
+            use_container_width=True,
+            hide_index=True    
+        )
+
+        col_submit, col_spacer = st.columns([1, 7])
+
+        submit_success = False
+
+        # Place the submit button in the narrow column
+        with col_submit:
+            if st.button("✅ Submit", use_container_width=True):
+                df = pd.DataFrame(edited_df)
+                df = clean_pasted_data(df)
+                if df.empty:
+                    st.warning("Table is empty.")
+                else:
+                    session_state.updated_df = df.drop_duplicates()
+                    session_state.No_of_rows = session_state.updated_df.shape[0]
+                    submit_success = True
+                    
+
+        # Below this, all content will use the full width normally
+        if submit_success:   
             def pay_calculator(df):
                         if Dev_dataframe.empty:
                             dummy_OWC= df
