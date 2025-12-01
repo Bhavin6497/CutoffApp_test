@@ -341,9 +341,9 @@ def page0():
                 # Sort the list of files alphabetically
                 files = sorted(session_state.files, key=lambda x: x.name)
                 
-                porosity_options = ['PIGE_QEPP', 'PIGE', 'PHIE_F', 'PHIE', 'PIGE_F','PHIE_Final','PHIE_FINAL','PIGE_RA','PIGN_QEPP']
-                saturation_options = ['SUWI', 'SW_F', 'SW', 'SUWI_QEPP', 'sw', 'Sw_F','SWE','SWE_Final','SWE_FINAL','SUWI_RA','SUWI_QEPP']
-                vcl_options = ['VCL', 'VCL_F', 'VCL_QEPP', 'VCL_GEO_QEPP','VSH','VSH_Final','VSH_FINAL','VCL_RA','Shale_QEPP']
+                porosity_options = ['PIGE_QEPP', 'PIGE', 'PHIE_F', 'PHIE', 'PIGE_F','PHIE_Final','PHIE_FINAL','PIGE_RA','PIGN_QEPP','PHIE_FINAL_SLB','PHIE_FINAL_BADHmv_SLB']
+                saturation_options = ['SUWI', 'SW_F', 'SW', 'SUWI_QEPP', 'sw', 'Sw_F','SWE','SWE_Final','SWE_FINAL','SUWI_RA','SUWI_QEPP','SWI_FINAL_SLB']
+                vcl_options = ['VCL', 'VCL_F', 'VCL_QEPP', 'VCL_GEO_QEPP','VSH','VSH_Final','VSH_FINAL','VCL_RA','Shale_QEPP','VCL_FINAL2_SLB']
                 depth_options = ['DEPT', 'MD', 'DEPTH']
                 
                 session_state.dfs = {}  # Initialize the dfs dictionary in session_state
@@ -1441,3 +1441,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
